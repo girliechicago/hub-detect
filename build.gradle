@@ -76,6 +76,15 @@ springBoot { mainClass = 'com.blackducksoftware.integration.hub.detect.Applicati
 
 jacocoTestReport {
     reports { xml.enabled = true }
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, 
+                exclude: [
+                    '**/Application*.class',
+                    '**/*BomTool*.class']
+            )
+        })
+    }
 }
 
 license {
