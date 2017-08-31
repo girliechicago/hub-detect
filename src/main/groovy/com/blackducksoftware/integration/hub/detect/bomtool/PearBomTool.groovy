@@ -36,6 +36,9 @@ import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
 import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableOutput
 
+import groovy.transform.TypeChecked
+import groovy.util.slurpersupport.GPathResult
+
 @Component
 class PearBomTool extends BomTool {
     private final Logger logger = LoggerFactory.getLogger(PearBomTool.class)
@@ -55,11 +58,12 @@ class PearBomTool extends BomTool {
     }
 
     @Override
+    @TypeChecked
     public boolean isBomToolApplicable() {
         boolean containsPackageXml = detectFileManager.containsAllFiles(sourcePath, PACKAGE_XML_FILENAME)
 
         if (containsPackageXml) {
-            pearExePath = executableManager.getPathOfExecutable(ExecutableType.PEAR, detectConfiguration.getPearPath())
+            pearExePath = findExecutablePath(ExecutableType.PEAR, true, detectConfiguration.getPearPath())
             if (!pearExePath) {
                 logger.warn("Could not find a ${executableManager.getExecutableName(ExecutableType.PEAR)} executable")
             }
@@ -74,7 +78,7 @@ class PearBomTool extends BomTool {
         ExecutableOutput pearDependencies = executableRunner.runExe(pearExePath, 'package-dependencies', PACKAGE_XML_FILENAME)
 
         File packageFile = detectFileManager.findFile(sourcePath, PACKAGE_XML_FILENAME)
-        def packageXml = new XmlSlurper().parseText(packageFile.text)
+        GPathResult packageXml = new XmlSlurper().parseText(packageFile.text)
         String rootName = packageXml.name
         String rootVersion = packageXml.version.release
 

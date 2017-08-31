@@ -37,7 +37,10 @@ import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
 import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableOutput
 
+import groovy.transform.TypeChecked
+
 @Component
+@TypeChecked
 class CpanBomTool extends BomTool {
     private final Logger logger = LoggerFactory.getLogger(CpanBomTool.class)
 
@@ -58,8 +61,8 @@ class CpanBomTool extends BomTool {
     public boolean isBomToolApplicable() {
         def containsFiles = detectFileManager.containsAllFiles(sourcePath, 'Makefile.PL')
         if (containsFiles) {
-            cpanExecutablePath = executableManager.getPathOfExecutable(ExecutableType.CPAN, detectConfiguration.getCpanPath())
-            cpanmExecutablePath = executableManager.getPathOfExecutable(ExecutableType.CPANM, detectConfiguration.getCpanmPath())
+            cpanExecutablePath = findExecutablePath(ExecutableType.CPAN, true, detectConfiguration.getCpanPath())
+            cpanmExecutablePath = findExecutablePath(ExecutableType.CPANM, true, detectConfiguration.getCpanmPath())
             if (!cpanExecutablePath) {
                 logger.warn("Could not find the ${executableManager.getExecutableName(ExecutableType.CPAN)} executable")
             }

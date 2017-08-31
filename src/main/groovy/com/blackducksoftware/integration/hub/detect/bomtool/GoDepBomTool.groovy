@@ -38,7 +38,10 @@ import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
 import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 import com.blackducksoftware.integration.hub.detect.util.executable.Executable
 
+import groovy.transform.TypeChecked
+
 @Component
+@TypeChecked
 class GoDepBomTool extends BomTool {
     private final Logger logger = LoggerFactory.getLogger(GoDepBomTool.class)
 
@@ -80,7 +83,7 @@ class GoDepBomTool extends BomTool {
 
         def goExecutablePath
         if (isTheBestGoBomTool) {
-            goExecutablePath = executableManager.getPathOfExecutable(ExecutableType.GO)
+            goExecutablePath = executableManager.getExecutablePath(ExecutableType.GO, true, sourcePath)
         }
         if (isTheBestGoBomTool && !goExecutablePath) {
             logger.warn("Could not find the ${executableManager.getExecutableName(ExecutableType.GO)} executable")
@@ -106,11 +109,11 @@ class GoDepBomTool extends BomTool {
             if (goDep.exists()) {
                 goDepPath = goDep.getAbsolutePath()
             } else {
-                goDepPath = executableManager.getPathOfExecutable(ExecutableType.GO_DEP)
+                goDepPath = executableManager.getExecutablePath(ExecutableType.GO_DEP, true, sourcePath)
             }
         }
         if (!goDepPath?.trim()) {
-            def goExecutable = executableManager.getPathOfExecutable(ExecutableType.GO)
+            def goExecutable = executableManager.getExecutablePath(ExecutableType.GO, true, sourcePath)
             goDepPath = installGoDep(goExecutable)
         }
         goDepPath

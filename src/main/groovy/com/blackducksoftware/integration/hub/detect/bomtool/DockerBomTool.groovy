@@ -36,7 +36,10 @@ import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
 import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 import com.blackducksoftware.integration.hub.detect.util.executable.Executable
 
+import groovy.transform.TypeChecked
+
 @Component
+@TypeChecked
 class DockerBomTool extends BomTool {
     private final Logger logger = LoggerFactory.getLogger(DockerBomTool.class)
 
@@ -62,8 +65,8 @@ class DockerBomTool extends BomTool {
         if (!propertiesOk) {
             logger.debug('The docker properties are not sufficient to run')
         } else {
-            dockerExecutablePath = executableManager.getPathOfExecutable(ExecutableType.DOCKER, detectConfiguration.dockerPath)?.trim()
-            bashExecutablePath = executableManager.getPathOfExecutable(ExecutableType.BASH, detectConfiguration.bashPath)?.trim()
+            dockerExecutablePath = findExecutablePath(ExecutableType.DOCKER, true, detectConfiguration.dockerPath)
+            bashExecutablePath = findExecutablePath(ExecutableType.BASH, true, detectConfiguration.bashPath)
             if (!dockerExecutablePath) {
                 logger.warn("Could not find a ${executableManager.getExecutableName(ExecutableType.DOCKER)} executable")
             }
@@ -84,7 +87,7 @@ class DockerBomTool extends BomTool {
             if (!'latest'.equals(detectConfiguration.dockerInspectorVersion)) {
                 hubDockerInspectorShellScriptUrl = new URL("https://blackducksoftware.github.io/hub-docker-inspector/hub-docker-inspector-${detectConfiguration.dockerInspectorVersion}.sh")
             }
-            String shellScriptContents = hubDockerInspectorShellScriptUrl.openStream().getText(StandardCharsets.UTF_8.name())
+            String shellScriptContents = hubDockerInspectorShellScriptUrl.openStream().getText(StandardCharsets.UTF_8.toString())
             shellScriptFile = detectFileManager.createFile(BomToolType.DOCKER, "hub-docker-inspector-${detectConfiguration.dockerInspectorVersion}.sh")
             detectFileManager.writeToFile(shellScriptFile, shellScriptContents)
             shellScriptFile.setExecutable(true)
@@ -116,7 +119,7 @@ class DockerBomTool extends BomTool {
 
         List<String> bashArguments = [
             "-c",
-            "${shellScriptFile.absolutePath} --spring.config.location=\"${dockerPropertiesDirectory.getAbsolutePath()}\" ${imageArgument}"
+            "${shellScriptFile.absolutePath} --spring.config.location=\"${dockerPropertiesDirectory.getAbsolutePath()}\" ${imageArgument}" as String
         ]
 
         Executable dockerExecutable = new Executable(shellScriptFile.parentFile, environmentVariables, bashExecutablePath, bashArguments)

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import com.blackducksoftware.integration.hub.HubSupportHelper
+import com.blackducksoftware.integration.hub.cli.OfflineCLILocation
 import com.blackducksoftware.integration.hub.cli.SimpleScanService
 import com.blackducksoftware.integration.hub.global.HubServerConfig
 import com.blackducksoftware.integration.hub.scan.HubScanConfig
@@ -35,14 +36,17 @@ import com.blackducksoftware.integration.log.Slf4jIntLogger
 import com.blackducksoftware.integration.util.CIEnvironmentVariables
 import com.google.gson.Gson
 
+import groovy.transform.TypeChecked
+
 @Component
+@TypeChecked
 class OfflineScanner {
     private static final Logger logger = LoggerFactory.getLogger(OfflineScanner.class)
 
     @Autowired
     Gson gson
 
-    void offlineScan(HubScanConfig hubScanConfig) {
+    void offlineScan(HubScanConfig hubScanConfig, String hubSignatureScannerOfflineLocalPath) {
         def intLogger = new Slf4jIntLogger(logger)
 
         def hubServerConfig = new HubServerConfig(null, 0, null, null, false)
@@ -55,6 +59,12 @@ class OfflineScanner {
         ciEnvironmentVariables.putAll(System.getenv())
 
         def simpleScanService = new SimpleScanService(intLogger, gson, hubServerConfig, hubSupportHelper, ciEnvironmentVariables, hubScanConfig, null, null)
-        simpleScanService.setupAndExecuteScan()
+        if(hubSignatureScannerOfflineLocalPath){
+            OfflineCLILocation cliLocation = new OfflineCLILocation(intLogger, new File(hubSignatureScannerOfflineLocalPath))
+            simpleScanService.setupAndExecuteScan(cliLocation)
+        } else {
+            simpleScanService.setupAndExecuteScan()
+        }
+        intLogger.info("The scan dry run files can be found in : ${simpleScanService.getDataDirectory()}")
     }
 }

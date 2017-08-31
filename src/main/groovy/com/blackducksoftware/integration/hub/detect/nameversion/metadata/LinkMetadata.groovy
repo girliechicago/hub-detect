@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
@@ -20,12 +20,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.detect.bomtool.sbt.models;
+package com.blackducksoftware.integration.hub.detect.nameversion.metadata
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode;
+import com.blackducksoftware.integration.hub.bdio.simple.model.Forge
+import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNode
+import com.blackducksoftware.integration.hub.detect.nameversion.NodeMetadata
 
-public class SbtConfigurationDependencyTree {
-    String configuration;
+import groovy.transform.TypeChecked
 
-    DependencyNode rootNode;
+@TypeChecked
+class LinkMetadata implements NodeMetadata {
+    Forge forge
+    NameVersionNode linkNode
 }

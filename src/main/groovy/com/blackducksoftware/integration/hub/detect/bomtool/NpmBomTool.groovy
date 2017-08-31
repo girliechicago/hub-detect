@@ -33,7 +33,10 @@ import com.blackducksoftware.integration.hub.detect.model.BomToolType
 import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
 import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 
+import groovy.transform.TypeChecked
+
 @Component
+@TypeChecked
 class NpmBomTool extends BomTool {
     private final Logger logger = LoggerFactory.getLogger(NpmBomTool.class)
 
@@ -71,7 +74,7 @@ class NpmBomTool extends BomTool {
         if (containsPackageJson && !containsNodeModules) {
             logger.warn("package.json was located in ${sourcePath}, but the node_modules folder was NOT located. Please run 'npm install' in that location and try again.")
         } else if (containsPackageJson && containsNodeModules) {
-            npmExePath = executableManager.getPathOfExecutable(ExecutableType.NPM, detectConfiguration.getNpmPath())
+            npmExePath = findExecutablePath(ExecutableType.NPM, true, detectConfiguration.getNpmPath())
             if (!npmExePath) {
                 logger.warn("Could not find a ${executableManager.getExecutableName(ExecutableType.NPM)} executable")
             }
@@ -102,7 +105,7 @@ class NpmBomTool extends BomTool {
         } else if (npmLsErrorFile.length() > 0) {
             logger.error("Error when running npm ls -json command\n${npmLsErrorFile.text}")
         } else {
-            logger.warn("Nothing returned from npm ls -json command");
+            logger.warn("Nothing returned from npm ls -json command")
         }
 
         []

@@ -20,19 +20,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.detect.nameversion
+package com.blackducksoftware.integration.hub.detect
 
-import org.apache.commons.lang3.builder.RecursiveToStringStyle
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder
+import com.google.gson.annotations.SerializedName
 
-class NameVersionLinkNode implements NameVersionNode {
-    String name
-    String version
-    List<NameVersionLinkNode> children = []
-    NameVersionNode link
+import groovy.transform.TypeChecked
 
-    @Override
-    String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE)
-    }
+@TypeChecked
+class BuildInfo {
+    @SerializedName("detect")
+    final String detectVersion
 }

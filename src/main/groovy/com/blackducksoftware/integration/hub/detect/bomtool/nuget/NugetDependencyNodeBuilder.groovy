@@ -28,43 +28,46 @@ import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.NameVe
 import com.blackducksoftware.integration.hub.detect.bomtool.nuget.model.NugetPackageId
 import com.blackducksoftware.integration.hub.detect.bomtool.nuget.model.NugetPackageSet
 
+import groovy.transform.TypeChecked
+
+@TypeChecked
 public class NugetDependencyNodeBuilder {
 
-    final List<NugetPackageSet> packageSets = new ArrayList<NugetPackageSet>();
-    final Map<NugetPackageId, DependencyNode> nodeMap = new HashMap<>();
+    final List<NugetPackageSet> packageSets = new ArrayList<NugetPackageSet>()
+    final Map<NugetPackageId, DependencyNode> nodeMap = new HashMap<>()
 
     public NugetDependencyNodeBuilder() {
     }
 
-    public void AddPackageSets(List<NugetPackageSet> sets) {
-        packageSets.addAll(sets);
+    public void addPackageSets(List<NugetPackageSet> sets) {
+        packageSets.addAll(sets)
     }
-    public void AddPackageSet(NugetPackageSet set) {
-        packageSets.add(set);
+    public void addPackageSet(NugetPackageSet set) {
+        packageSets.add(set)
     }
 
-    public Set<DependencyNode> CreateDependencyNodes(List<NugetPackageId> packageDependencies) {
+    public Set<DependencyNode> createDependencyNodes(List<NugetPackageId> packageDependencies) {
         def nodes = new HashSet<DependencyNode>()
         packageDependencies.each {
-            nodes.add(GetOrCreate(it))
+            nodes.add(getOrCreateDependencyNode(it))
         }
         nodes
     }
 
 
-    public DependencyNode GetOrCreate(NugetPackageId id) {
-        def node = nodeMap.getOrDefault(id, null)
+    public DependencyNode getOrCreateDependencyNode(NugetPackageId id) {
+        def node = nodeMap.get(id, null)
         if (node == null) {
             def externalId = new NameVersionExternalId(Forge.NUGET, id.name, id.version)
             node = new DependencyNode(id.name, id.version, externalId)
-            nodeMap.put(id, node);
+            nodeMap.put(id, node)
 
             //restore children
             def packageSet = packageSets.find{ set ->
                 set.packageId.equals(id)
             }
 
-            def nodeChildren = packageSet.dependencies.collect{ child ->  GetOrCreate(child) }
+            def nodeChildren = packageSet.dependencies.collect{ child ->  getOrCreateDependencyNode(child) }
 
             node.children.addAll(nodeChildren)
 
@@ -73,7 +76,7 @@ public class NugetDependencyNodeBuilder {
                 set.dependencies.contains(packageSet.packageId) //all packages that depend on me. so parent.children -> me
             }
 
-            parents.each{pkg -> GetOrCreate(pkg.packageId).children.add(node)}
+            parents.each{pkg -> getOrCreateDependencyNode(pkg.packageId).children.add(node)}
         }
 
         node

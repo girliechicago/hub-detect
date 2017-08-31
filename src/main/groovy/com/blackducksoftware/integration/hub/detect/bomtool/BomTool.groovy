@@ -28,10 +28,14 @@ import com.blackducksoftware.integration.hub.detect.DetectConfiguration
 import com.blackducksoftware.integration.hub.detect.model.BomToolType
 import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNodeTransformer
+import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 import com.blackducksoftware.integration.hub.detect.util.DetectFileManager
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableManager
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableRunner
 
+import groovy.transform.TypeChecked
+
+@TypeChecked
 abstract class BomTool {
     @Autowired
     DetectConfiguration detectConfiguration
@@ -65,5 +69,13 @@ abstract class BomTool {
 
     File getSourceDirectory() {
         detectConfiguration.sourceDirectory
+    }
+
+    String findExecutablePath(ExecutableType executable, boolean searchSystemPath, String userPath) {
+        if (!userPath?.trim()) {
+            return executableManager.getExecutablePath(executable, searchSystemPath, sourcePath)
+        }
+
+        userPath
     }
 }

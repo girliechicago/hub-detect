@@ -22,8 +22,6 @@
  */
 package com.blackducksoftware.integration.hub.detect.hub
 
-import java.nio.charset.StandardCharsets
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,9 +37,11 @@ import com.blackducksoftware.integration.hub.model.request.ProjectRequest
 import com.blackducksoftware.integration.hub.model.view.ProjectVersionView
 import com.blackducksoftware.integration.hub.request.builder.ProjectRequestBuilder
 import com.blackducksoftware.integration.hub.scan.HubScanConfig
-import com.blackducksoftware.integration.util.ResourceUtil
+
+import groovy.transform.TypeChecked
 
 @Component
+@TypeChecked
 class HubSignatureScanner {
     private final Logger logger = LoggerFactory.getLogger(HubSignatureScanner.class)
 
@@ -94,8 +94,8 @@ class HubSignatureScanner {
     public ProjectVersionView scanPaths(HubServerConfig hubServerConfig, CLIDataService cliDataService, DetectProject detectProject) {
         ProjectVersionView projectVersionView = null
         if (detectProject.projectName && detectProject.projectVersionName && detectConfiguration.hubSignatureScannerPaths) {
-            detectConfiguration.hubSignatureScannerPaths.each {
-                projectVersionView = scanPath(cliDataService, hubServerConfig, new File(it).canonicalPath, detectProject)
+            detectConfiguration.hubSignatureScannerPaths.each { String path ->
+                projectVersionView = scanPath(cliDataService, hubServerConfig, new File(path).canonicalPath, detectProject)
             }
         } else {
             registeredPaths.each {
@@ -111,8 +111,8 @@ class HubSignatureScanner {
 
     public void scanPathsOffline(DetectProject detectProject) {
         if (detectProject.projectName && detectProject.projectVersionName && detectConfiguration.hubSignatureScannerPaths) {
-            detectConfiguration.hubSignatureScannerPaths.each {
-                scanPathOffline(new File(it).canonicalPath, detectProject)
+            detectConfiguration.hubSignatureScannerPaths.each { String path ->
+                scanPathOffline(new File(path).canonicalPath, detectProject)
             }
         } else {
             registeredPaths.each {
@@ -136,7 +136,7 @@ class HubSignatureScanner {
             HubScanConfigBuilder hubScanConfigBuilder = createScanConfigBuilder(detectProject, canonicalPath)
             HubScanConfig hubScanConfig = hubScanConfigBuilder.build()
 
-            String hubDetectVersion = ResourceUtil.getResourceAsString('version.txt', StandardCharsets.UTF_8)
+            String hubDetectVersion = detectConfiguration.getBuildInfo().getDetectVersion()
             projectVersionView = cliDataService.installAndRunControlledScan(hubServerConfig, hubScanConfig, projectRequest, false, 'Hub-Detect', hubDetectVersion, hubDetectVersion)
             logger.info("${canonicalPath} was successfully scanned by the BlackDuck CLI.")
         } catch (Exception e) {
@@ -150,13 +150,14 @@ class HubSignatureScanner {
             HubScanConfigBuilder hubScanConfigBuilder = createScanConfigBuilder(detectProject, canonicalPath)
             hubScanConfigBuilder.setDryRun(true)
 
-            if (detectConfiguration.hubSignatureScannerOfflineLocalPath) {
-                hubScanConfigBuilder.toolsDir = new File(detectConfiguration.hubSignatureScannerOfflineLocalPath)
+            if (!detectConfiguration.hubSignatureScannerOfflineLocalPath) {
+                File scannerDirectory = detectFileManager.createDirectory('signature_scanner')
+                File toolsDirectory = detectFileManager.createDirectory(scannerDirectory, 'tools')
+                hubScanConfigBuilder.toolsDir = toolsDirectory
             }
 
             HubScanConfig hubScanConfig = hubScanConfigBuilder.build()
-
-            offlineScanner.offlineScan(hubScanConfig)
+            offlineScanner.offlineScan(hubScanConfig, detectConfiguration.hubSignatureScannerOfflineLocalPath)
         } catch (Exception e) {
             logger.error("${detectProject.projectName}/${detectProject.projectVersionName} - ${canonicalPath} was not scanned by the BlackDuck CLI: ${e.message}")
         }

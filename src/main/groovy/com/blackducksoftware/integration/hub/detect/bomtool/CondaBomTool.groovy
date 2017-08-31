@@ -38,7 +38,10 @@ import com.blackducksoftware.integration.hub.detect.type.ExecutableType
 import com.blackducksoftware.integration.hub.detect.util.executable.Executable
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableOutput
 
+import groovy.transform.TypeChecked
+
 @Component
+@TypeChecked
 class CondaBomTool extends BomTool {
     private final Logger logger = LoggerFactory.getLogger(CondaBomTool.class)
 
@@ -56,7 +59,7 @@ class CondaBomTool extends BomTool {
     public boolean isBomToolApplicable() {
         def containsFiles = detectFileManager.containsAllFiles(sourcePath, 'environment.yml')
         if (containsFiles) {
-            condaExecutablePath = executableManager.getPathOfExecutable(ExecutableType.CONDA, detectConfiguration.getCondaPath())
+            condaExecutablePath = findExecutablePath(ExecutableType.CONDA, true, detectConfiguration.getCondaPath())
             if (!condaExecutablePath) {
                 logger.warn("Could not find the ${executableManager.getExecutableName(ExecutableType.CONDA)} executable")
             }
@@ -69,7 +72,7 @@ class CondaBomTool extends BomTool {
     public List<DetectCodeLocation> extractDetectCodeLocations() {
         List<String> condaListOptions = ['list']
         if (detectConfiguration.getCondaEnvironmentName()) {
-            condaListOptions.add([
+            condaListOptions.addAll([
                 '-n',
                 detectConfiguration.getCondaEnvironmentName()
             ])

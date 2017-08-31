@@ -25,10 +25,14 @@ package com.blackducksoftware.integration.hub.detect.nameversion
 import org.apache.commons.lang3.builder.RecursiveToStringStyle
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder
 
+import groovy.transform.TypeChecked
+
+@TypeChecked
 class NameVersionNodeImpl implements NameVersionNode {
     String name
     String version
     List<NameVersionNodeImpl> children = []
+    NodeMetadata metadata
 
     @Override
     String toString() {
