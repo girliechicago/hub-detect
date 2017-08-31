@@ -4,8 +4,8 @@ buildscript {
     }
 
     dependencies {
-        classpath('org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE')
-        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE'
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1'
     }
 }
 
@@ -54,6 +54,10 @@ build {
         shellScriptFile << shellScriptContents
         shellScriptFile.setExecutable(true)
     }
+}
+
+task generateDetectProperties(type: com.blackducksoftware.integration.hub.detect.DetectPropertiesTask) {
+    println 'running props task'
 }
 
 repositories {

@@ -1,0 +1,13 @@
+[
+	{
+		"propertyKey": "detect.docker.image",
+		"description": "The docker image name to inspect. For detect to run docker either this property or detect.docker.tar must be set.",
+		"defaultValue": "",
+		"propertyType": "String",
+		"group": "DOCKER"
+	},
+	{
+		"propertyKey": "logging.pattern.console",
+		"defaultValue": "${LOG_LEVEL_PATTERN}%clr(---){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+	}
+]
