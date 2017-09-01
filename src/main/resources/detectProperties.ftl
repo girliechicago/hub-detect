@@ -30,7 +30,7 @@ import com.blackducksoftware.integration.hub.detect.help.ValueDescription
 @Component
 class DetectProperties {
     /**
-     * This class is generated from the src/main/resources/detectProperties.fmt file.
+     * This class is generated from the src/main/resources/detectProperties.ftl file.
      * Any necessary changes should be made there and then this class should be generated from the template.
      */
 

@@ -6,5 +6,7 @@ class DetectPropertyData {
     String defaultValue
     String propertyType
     String group
+    String javaCodePrefix
+    String javaCodeSuffix
 
 }

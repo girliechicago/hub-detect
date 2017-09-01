@@ -186,6 +186,10 @@ class DetectConfiguration {
         logger.info(configurationMessage)
     }
 
+    public List<String> getHubSignatureScannerPathsToExclude() {
+        return excludedScanPaths
+    }
+
     private int convertInt(Integer integerObj) {
         return integerObj == null ? 0 : integerObj.intValue()
     }
@@ -194,6 +198,11 @@ class DetectConfiguration {
         return longObj == null ? 0L : longObj.longValue()
     }
 
+    /**
+     * Don't delete this marker - it is so the code between the markers can be auto-generated.
+     * If changes to this code are needed, please make them in detectConfiguration.ftl and generate the code again.
+     */
+    //AUTO-GENERATE PROPERTIES START MARKER
     public boolean getCleanupBdioFiles() {
         return BooleanUtils.toBoolean(detectProperties.cleanupBdioFiles)
     }
@@ -377,9 +386,6 @@ class DetectConfiguration {
     public String[] getHubSignatureScannerExclusionPatterns() {
         return detectProperties.hubSignatureScannerExclusionPatterns
     }
-    public List<String> getHubSignatureScannerPathsToExclude() {
-        return excludedScanPaths
-    }
     public String getHubSignatureScannerOfflineLocalPath() {
         return detectProperties.hubSignatureScannerOfflineLocalPath
     }
@@ -446,4 +452,5 @@ class DetectConfiguration {
     public String getNugetPackagesRepoUrl() {
         return detectProperties.nugetPackagesRepoUrl?.trim()
     }
+    //AUTO-GENERATE PROPERTIES END MARKER
 }

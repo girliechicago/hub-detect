@@ -8,10 +8,10 @@ import com.google.gson.reflect.TypeToken
 class DetectPropertiesJsonParser {
     List<Map<String, String>> groups = []
     List<Map<String, String>> detectProperties = []
+    List<Map<String, String>> applicationProperties = []
 
     void parseJson(Gson gson, String json) {
-        Type detectPropertiesListType = new TypeToken<List<DetectPropertyData>>(){}.getType();
-        List<DetectPropertyData> detectPropertyDataList = gson.fromJson(json, detectPropertiesListType)
+        List<DetectPropertyData> detectPropertyDataList = gson.fromJson(json, new TypeToken<List<DetectPropertyData>>(){}.getType())
 
         detectPropertyDataList.each {
             if (it.group) {
@@ -23,8 +23,9 @@ class DetectPropertiesJsonParser {
             def javaName = keyPieces[1] + keyPieces[2..-1].collect {
                 it[0].toUpperCase() + it[1..-1]
             }.join('')
+            def javaMethodName = "get${javaName.capitalize()}"
 
-            def detectProperty = [key: it.propertyKey, javaName: javaName]
+            def detectProperty = [key: it.propertyKey, javaName: javaName, javaMethodName: javaMethodName]
             if (it.description)
                 detectProperty.put('description', it.description)
             if (it.defaultValue)
@@ -35,6 +36,12 @@ class DetectPropertiesJsonParser {
                 detectProperty.put('group', it.group)
 
             detectProperties.add(detectProperty)
+
+            def applicationProperty = [key: it.propertyKey]
+            if (it.defaultValue)
+                applicationProperty.put('defaultValue', it.defaultValue)
+
+            applicationProperties.add(applicationProperty)
         }
     }
 }

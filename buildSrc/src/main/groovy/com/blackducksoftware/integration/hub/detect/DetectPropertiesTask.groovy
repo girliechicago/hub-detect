@@ -21,17 +21,23 @@ class DetectPropertiesTask extends DefaultTask {
 
         final Configuration configuration = new Configuration(Configuration.VERSION_2_3_26)
         configuration.setDirectoryForTemplateLoading(new File("${projectDir}/src/main/resources"))
-        configuration.setDefaultEncoding("UTF-8")
+        configuration.setDefaultEncoding('UTF-8')
         configuration.setLogTemplateExceptions(true)
 
         final Map model = new HashMap()
 
         model.put('groups', detectPropertiesJsonParser.groups)
         model.put('detectProperties', detectPropertiesJsonParser.detectProperties)
+        model.put('applicationProperties', detectPropertiesJsonParser.applicationProperties)
 
-        final Template template = configuration.getTemplate("detectProperties.ftl")
+        final Template detectPropertiesTemplate = configuration.getTemplate('detectProperties.ftl')
+        final Template detectConfigurationTemplate = configuration.getTemplate('detectConfiguration.ftl')
+        final Template applicationPropertiesTemplate = configuration.getTemplate('applicationProperties.ftl')
 
         final Writer writer = new OutputStreamWriter(System.out)
-        template.process(model, writer)
+
+        detectPropertiesTemplate.process(model, writer)
+        detectConfigurationTemplate.process(model, writer)
+        applicationPropertiesTemplate.process(model, writer)
     }
 }
