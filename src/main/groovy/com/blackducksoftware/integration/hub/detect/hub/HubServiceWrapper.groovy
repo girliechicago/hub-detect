@@ -79,13 +79,14 @@ class HubServiceWrapper {
         try {
             IntLogger slf4jIntLogger = new Slf4jIntLogger(logger)
             HubServerConfig hubServerConfig = createHubServerConfig(slf4jIntLogger)
+
             final RestConnection connection = hubServerConfig.createCredentialsRestConnection(slf4jIntLogger)
             connection.connect()
             logger.info("Connection to the Hub was successful")
         } catch (IllegalStateException e) {
             logger.error("Failed to build the server configuration: ${e.message}", e)
         } catch (IntegrationException e) {
-            logger.error("Could not reach the Hub server or the credentials were invalid: {e.message}", e)
+            logger.error("Could not reach the Hub server or the credentials were invalid: ${e.message}", e)
         }
     }
 
