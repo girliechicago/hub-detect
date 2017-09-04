@@ -206,6 +206,9 @@ class DetectConfiguration {
     public boolean getCleanupBdioFiles() {
         return BooleanUtils.toBoolean(detectProperties.cleanupBdioFiles)
     }
+    public boolean getTestConnection() {
+        return BooleanUtils.toBoolean(detectProperties.testConnection)
+    }
     public String getHubUrl() {
         return detectProperties.hubUrl
     }

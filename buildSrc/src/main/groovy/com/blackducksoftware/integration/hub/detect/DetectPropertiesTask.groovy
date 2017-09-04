@@ -12,15 +12,16 @@ class DetectPropertiesTask extends DefaultTask {
     @TaskAction
     def generate() {
         File projectDir = getProject().getProjectDir()
-        println projectDir.canonicalPath
 
         DetectPropertiesJsonParser detectPropertiesJsonParser = new DetectPropertiesJsonParser()
         Gson gson = new Gson()
-        String jsonProperties = new File("${projectDir}/src/main/resources/application_properties.json").text
+        String jsonFilePath = filePath([projectDir.canonicalPath, 'src', 'main', 'resources', 'application_properties.json'])
+        String jsonProperties = new File(jsonFilePath).text
         detectPropertiesJsonParser.parseJson(gson, jsonProperties)
 
+        String resourcesPath = filePath([projectDir.canonicalPath, 'src', 'main', 'resources'])
         final Configuration configuration = new Configuration(Configuration.VERSION_2_3_26)
-        configuration.setDirectoryForTemplateLoading(new File("${projectDir}/src/main/resources"))
+        configuration.setDirectoryForTemplateLoading(new File(resourcesPath))
         configuration.setDefaultEncoding('UTF-8')
         configuration.setLogTemplateExceptions(true)
 
@@ -34,10 +35,15 @@ class DetectPropertiesTask extends DefaultTask {
         final Template detectConfigurationTemplate = configuration.getTemplate('detectConfiguration.ftl')
         final Template applicationPropertiesTemplate = configuration.getTemplate('applicationProperties.ftl')
 
-        final Writer writer = new OutputStreamWriter(System.out)
+        String applicationProperitesPath = filePath([projectDir.canonicalPath, 'src', 'main', 'resources', 'application.properties'])
+        final Writer writer = new FileWriter(applicationPropertiesPath)
 
         detectPropertiesTemplate.process(model, writer)
         detectConfigurationTemplate.process(model, writer)
         applicationPropertiesTemplate.process(model, writer)
+    }
+
+    private String filePath(List<String> pathPieces) {
+        pathPieces.join(File.separator)
     }
 }
