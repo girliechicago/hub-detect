@@ -41,13 +41,13 @@ class DetectProperties {
 <#list detectProperties as detectProperty>
     <#if detectProperty.description??>
         <#if detectProperty.defaultValue??>
-    @ValueDescription(description='${detectProperty.description}', defaultValue='${detectProperty.defaultValue}', group=DetectProperties.GROUP_${detectProperty.group})
+    @ValueDescription(description="${detectProperty.description}", defaultValue="${detectProperty.defaultValue}", group=DetectProperties.GROUP_${detectProperty.group})
         <#else>
-    @ValueDescription(description='${detectProperty.description}', group=DetectProperties.GROUP_${detectProperty.group})
+    @ValueDescription(description="${detectProperty.description}", group=DetectProperties.GROUP_${detectProperty.group})
         </#if>
     @Value('${"${"}${detectProperty.key}${"}"}')
     ${detectProperty.type} ${detectProperty.javaName}
+
     </#if>
 </#list>
-
 }

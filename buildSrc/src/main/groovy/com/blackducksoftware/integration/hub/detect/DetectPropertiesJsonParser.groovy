@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class DetectPropertiesJsonParser {
-    List<Map<String, String>> groups = []
+    Set<Map<String, String>> groups = []
     List<Map<String, String>> detectProperties = []
     List<Map<String, String>> applicationProperties = []
 
