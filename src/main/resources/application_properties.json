@@ -527,6 +527,13 @@
         "group": "NUGET"
     },
     {
+        "propertyKey": "detect.nuget.packages.repo.url",
+        "description": "The url to the repository from which Nuget should resolve dependencies from",
+        "defaultValue": "https://www.nuget.org/api/v2/",
+        "propertyType": "String",
+        "group": "NUGET"
+    },
+    {
         "propertyKey": "logging.pattern.console",
         "defaultValue": "${LOG_LEVEL_PATTERN}%clr(---){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
     }

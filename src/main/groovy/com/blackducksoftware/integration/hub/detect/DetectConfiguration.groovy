@@ -455,5 +455,8 @@ class DetectConfiguration {
     public String getNugetInspectorAirGapPath() {
         return detectProperties.nugetInspectorAirGapPath?.trim()
     }
+    public String getNugetPackagesRepoUrl() {
+        return detectProperties.nugetPackagesRepoUrl?.trim()
+    }
     //AUTO-GENERATE PROPERTIES END MARKER
 }
