@@ -374,8 +374,8 @@ class DetectConfiguration {
     public String getBashPath() {
         return detectProperties.bashPath?.trim()
     }
-    public String getLevelComBlackducksoftwareIntegration() {
-        return detectProperties.levelComBlackducksoftwareIntegration?.trim()
+    public String getLoggingLevel() {
+        return detectProperties.loggingLevel?.trim()
     }
     public boolean getCleanupBomToolFiles() {
         return BooleanUtils.toBoolean(detectProperties.cleanupBomToolFiles)

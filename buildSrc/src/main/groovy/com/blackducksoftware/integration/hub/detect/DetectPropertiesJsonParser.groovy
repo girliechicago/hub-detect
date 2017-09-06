@@ -19,7 +19,8 @@ class DetectPropertiesJsonParser {
                 groups.add([javaName: it.group, textName: groupText])
             }
 
-            def keyPieces = it.propertyKey.split('\\.')
+            def propertyKey = it.propertyKeyOverride?.trim() ? it.propertyKeyOverride : it.propertyKey
+            def keyPieces = propertyKey.split('\\.')
             def javaName = keyPieces[1] + keyPieces[2..-1].collect {
                 it[0].toUpperCase() + it[1..-1]
             }.join('')
