@@ -41,7 +41,7 @@ class DockerProperties {
         dockerProperties.setProperty('hub.username', detectConfiguration.getHubUsername())
         dockerProperties.setProperty('hub.project.name', detectConfiguration.getProjectName())
         dockerProperties.setProperty('hub.project.version', detectConfiguration.getProjectVersionName())
-        dockerProperties.setProperty('logging.level.com.blackducksoftware', detectConfiguration.getLoggingLevel())
+        dockerProperties.setProperty('logging.level.com.blackducksoftware', detectConfiguration.getLevelComBlackducksoftwareIntegration())
 
         detectConfiguration.additionalDockerPropertyNames.each { propertyName ->
             String dockerKey = propertyName[DetectConfiguration.DOCKER_PROPERTY_PREFIX.length()..-1]

@@ -1,7 +1,7 @@
 <#macro printIfExists textContent=""><#if textContent?has_content>${textContent}</#if></#macro>
 
 <#list detectProperties as detectProperty>
-    <#if detectProperty.description??>
+    <#if detectProperty.type??>
         <#if detectProperty.type == "Boolean">
             <#assign javaPrimitiveType="boolean">
             <#assign javaCommonPrefix="BooleanUtils.toBoolean(">
@@ -15,9 +15,12 @@
             <#assign javaCommonPrefix="convertLong(">
             <#assign javaCommonSuffix=")">
         <#elseif detectProperty.type == "String[]">
+            <#assign javaCommonPrefix="">
+            <#assign javaCommonSuffix="">
             <#assign javaPrimitiveType="String[]">
         <#else>
             <#assign javaPrimitiveType="String">
+            <#assign javaCommonPrefix="">
             <#assign javaCommonSuffix="?.trim()">
         </#if>
     public ${javaPrimitiveType} ${detectProperty.javaMethodName}() {

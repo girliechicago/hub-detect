@@ -37,17 +37,18 @@ class DetectProperties {
 <#list groups as group>
     private static final String GROUP_${group.javaName} = '${group.textName}'
 </#list>
-
 <#list detectProperties as detectProperty>
-    <#if detectProperty.description??>
-        <#if detectProperty.defaultValue??>
+    <#if detectProperty.type??>
+
+        <#if detectProperty.description??>
+            <#if detectProperty.defaultValue??>
     @ValueDescription(description="${detectProperty.description}", defaultValue="${detectProperty.defaultValue}", group=DetectProperties.GROUP_${detectProperty.group})
-        <#else>
+            <#else>
     @ValueDescription(description="${detectProperty.description}", group=DetectProperties.GROUP_${detectProperty.group})
+            </#if>
         </#if>
     @Value('${"${"}${detectProperty.key}${"}"}')
-    ${detectProperty.type} ${detectProperty.javaName}
-
+    ${(detectProperty.type)} ${detectProperty.javaName}
     </#if>
 </#list>
 }

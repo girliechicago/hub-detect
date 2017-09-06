@@ -127,7 +127,7 @@
     {
         "propertyKey": "detect.project.level.adjustments",
         "defaultValue": "true",
-        "propertyType": "String",
+        "propertyType": "Boolean",
         "group": "PROJECT_INFO"
     },
     {

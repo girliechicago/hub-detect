@@ -108,6 +108,42 @@ class DetectProperties {
     @Value('${blackduck.hub.offline.mode}')
     Boolean hubOfflineMode
 
+    @Value('${detect.source.path}')
+    String sourcePath
+
+    @Value('${detect.output.path}')
+    String outputPath
+
+    @Value('${detect.search.depth}')
+    Integer searchDepth
+
+    @Value('${detect.excluded.bom.tool.types}')
+    String excludedBomToolTypes
+
+    @Value('${detect.included.bom.tool.types}')
+    String includedBomToolTypes
+
+    @Value('${detect.project.name}')
+    String projectName
+
+    @Value('${detect.project.version.name}')
+    String projectVersionName
+
+    @Value('${detect.project.codelocation.prefix}')
+    String projectCodelocationPrefix
+
+    @Value('${detect.project.level.adjustments}')
+    Boolean projectLevelAdjustments
+
+    @Value('${detect.project.version.phase}')
+    String projectVersionPhase
+
+    @Value('${detect.project.version.distribution}')
+    String projectVersionDistribution
+
+    @Value('${detect.policy.check}')
+    Boolean policyCheck
+
     @ValueDescription(description="Timeout for the Hub's policy check response. When changing this value, keep in mind the checking of policies might have to wait for a new scan to process which can take some time.", defaultValue="300000", group=DetectProperties.GROUP_POLICY_CHECK)
     @Value('${detect.policy.check.timeout}')
     Long policyCheckTimeout
@@ -343,5 +379,4 @@ class DetectProperties {
     @ValueDescription(description="The path to the nuget inspector nupkg", group=DetectProperties.GROUP_NUGET)
     @Value('${detect.nuget.inspector.air.gap.path}')
     String nugetInspectorAirGapPath
-
 }
