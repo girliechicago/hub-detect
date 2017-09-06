@@ -352,7 +352,7 @@
     },
     {
         "propertyKey": "logging.level.com.blackducksoftware.integration",
-        "propertyKeyOverride": "detect.logging.level",
+        "javaName": "loggingLevel",
         "defaultValue": "INFO",
         "description": "The logging level of Detect (ALL|TRACE|DEBUG|INFO|WARN|ERROR|FATAL|OFF)",
         "propertyType": "String",

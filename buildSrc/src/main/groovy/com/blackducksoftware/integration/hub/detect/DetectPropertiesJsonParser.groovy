@@ -19,11 +19,13 @@ class DetectPropertiesJsonParser {
                 groups.add([javaName: it.group, textName: groupText])
             }
 
-            def propertyKey = it.propertyKeyOverride?.trim() ? it.propertyKeyOverride : it.propertyKey
-            def keyPieces = propertyKey.split('\\.')
+            def keyPieces = it.propertyKey.split('\\.')
             def javaName = keyPieces[1] + keyPieces[2..-1].collect {
                 it[0].toUpperCase() + it[1..-1]
             }.join('')
+            if (it.javaName) {
+                javaName = it.javaName
+            }
             def javaMethodName = "get${javaName.capitalize()}"
 
             def detectProperty = [key: it.propertyKey, javaName: javaName, javaMethodName: javaMethodName]
