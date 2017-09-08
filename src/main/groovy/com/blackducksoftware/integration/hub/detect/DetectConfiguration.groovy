@@ -227,8 +227,8 @@ class DetectConfiguration {
     public boolean getHubOfflineMode() {
         return BooleanUtils.toBoolean(detectProperties.hubOfflineMode)
     }
-    public boolean getHubAutoImportCertificate() {
-        return BooleanUtils.toBoolean(detectProperties.hubAutoImportCertificate)
+    public boolean getHubTrustCertificate() {
+        return BooleanUtils.toBoolean(detectProperties.hubTrustCertificate)
     }
     public String getSourcePath() {
         return detectProperties.sourcePath

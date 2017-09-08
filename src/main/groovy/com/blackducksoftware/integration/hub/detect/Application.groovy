@@ -48,6 +48,7 @@ import com.blackducksoftware.integration.hub.model.view.ProjectVersionView
 import com.blackducksoftware.integration.util.IntegrationEscapeUtil
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+
 import freemarker.template.Configuration
 import groovy.transform.TypeChecked
 
@@ -158,8 +159,7 @@ class Application {
     @Bean
     Configuration configuration() {
         final Configuration configuration = new Configuration(Configuration.VERSION_2_3_26)
-        final File applicationPropertiesFile = new File(getClass().getResource('/application.properties').toURI())
-        configuration.setDirectoryForTemplateLoading(applicationPropertiesFile.getParentFile())
+        configuration.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "/")
         configuration.setDefaultEncoding('UTF-8')
         configuration.setLogTemplateExceptions(true)
 
