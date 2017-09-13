@@ -25,6 +25,8 @@ package com.blackducksoftware.integration.hub.detect.bomtool.maven
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
@@ -38,7 +40,7 @@ import groovy.transform.TypeChecked
 @Component
 @TypeChecked
 class MavenCodeLocationPackager {
-    public static final Pattern gavRegex = Pattern.compile('(.*?):(.*?):(.*?):([^:\\n\\r]*)(:(.*))*')
+    Logger logger = LoggerFactory.getLogger(MavenCodeLocationPackager.class)
 
     public static final List<String> indentationStrings = ['+- ', '|  ', '\\- ', '   ']
 
@@ -58,17 +60,18 @@ class MavenCodeLocationPackager {
         level = 0
 
         for (String line : mavenOutputText.split(System.lineSeparator())) {
-            if (!line.startsWith("[INFO]")) {
+            if (line ==~ /\[.*INFO.*\]/) {
                 continue
             }
 
-            line = line.replace("[INFO] ", "")
+            String[] groups = (line =~ /.*INFO.*? (.*)/)[0] as String[]
+            line = groups[1]
             if (!line.trim()) {
                 previousLineWasEmpty = true
                 continue
             }
 
-            if (line.startsWith('--- maven-dependency-plugin') && previousLineWasEmpty) {
+            if ((line ==~ /.*---.*maven-dependency-plugin.*/) && previousLineWasEmpty) {
                 parsingProjectSection = true
                 previousLineWasEmpty = false
                 continue
@@ -153,8 +156,9 @@ class MavenCodeLocationPackager {
     }
 
     DependencyNode textToDependencyNode(final String componentText) {
-        Matcher gavMatcher = gavRegex.matcher(componentText)
-        if (!gavMatcher.find()) {
+        Matcher gavMatcher = componentText =~ /(.*?):(.*?):(.*?):([^:]*)(:(.*))*/
+        if (!gavMatcher.matches()) {
+            logger.debug("${componentText} does not match pattern ${gavMatcher.pattern().toString()}")
             return null
         }
 

@@ -452,11 +452,20 @@ class DetectConfiguration {
     public String getGradleInspectorAirGapPath() {
         return detectProperties.gradleInspectorAirGapPath?.trim()
     }
+    public String getGradleInspectorRepositoryUrl() {
+        return detectProperties.gradleInspectorRepositoryUrl?.trim()
+    }
     public String getNugetInspectorAirGapPath() {
         return detectProperties.nugetInspectorAirGapPath?.trim()
     }
     public String getNugetPackagesRepoUrl() {
         return detectProperties.nugetPackagesRepoUrl?.trim()
+    }
+    public boolean getNpmIncludeDevDependencies() {
+        return BooleanUtils.toBoolean(detectProperties.npmIncludeDevDependencies)
+    }
+    public boolean getSuppressResultsOutput() {
+        return BooleanUtils.toBoolean(detectProperties.suppressResultsOutput)
     }
     //AUTO-GENERATE PROPERTIES END MARKER
 }

@@ -376,6 +376,10 @@ class DetectProperties {
     @Value('${detect.gradle.inspector.air.gap.path}')
     String gradleInspectorAirGapPath
 
+    @ValueDescription(description="The url to the repository to look for the gradle inspector", group=DetectProperties.GROUP_GRADLE)
+    @Value('${detect.gradle.inspector.repository.url}')
+    String gradleInspectorRepositoryUrl
+
     @ValueDescription(description="The path to the nuget inspector nupkg", group=DetectProperties.GROUP_NUGET)
     @Value('${detect.nuget.inspector.air.gap.path}')
     String nugetInspectorAirGapPath
@@ -383,4 +387,12 @@ class DetectProperties {
     @ValueDescription(description="The url to the repository from which Nuget should resolve dependencies from", defaultValue="https://www.nuget.org/api/v2/", group=DetectProperties.GROUP_NUGET)
     @Value('${detect.nuget.packages.repo.url}')
     String nugetPackagesRepoUrl
+
+    @ValueDescription(description="Set this value to false if you would like to exclude your dev dependencies when ran", defaultValue="true", group=DetectProperties.GROUP_NPM)
+    @Value('${detect.npm.include.dev.dependencies}')
+    Boolean npmIncludeDevDependencies
+
+    @ValueDescription(description="If true, the default behavior of printing the Detect Results will be suppressed", defaultValue="false", group=DetectProperties.GROUP_LOGGING)
+    @Value('${detect.suppress.results.output}')
+    Boolean suppressResultsOutput
 }

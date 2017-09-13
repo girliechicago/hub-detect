@@ -521,6 +521,12 @@
         "group": "GRADLE"
     },
     {
+        "propertyKey": "detect.gradle.inspector.repository.url",
+        "description": "The url to the repository to look for the gradle inspector",
+        "propertyType": "String",
+        "group": "GRADLE"
+    },
+    {
         "propertyKey": "detect.nuget.inspector.air.gap.path",
         "description": "The path to the nuget inspector nupkg",
         "propertyType": "String",
@@ -532,6 +538,20 @@
         "defaultValue": "https://www.nuget.org/api/v2/",
         "propertyType": "String",
         "group": "NUGET"
+    },
+    {
+        "propertyKey": "detect.npm.include.dev.dependencies",
+        "description": "Set this value to false if you would like to exclude your dev dependencies when ran",
+        "defaultValue": "true",
+        "propertyType": "Boolean",
+        "group": "NPM"
+    },
+    {
+        "propertyKey": "detect.suppress.results.output",
+        "description": "If true, the default behavior of printing the Detect Results will be suppressed",
+        "defaultValue": "false",
+        "propertyType": "Boolean",
+        "group": "LOGGING"
     },
     {
         "propertyKey": "logging.pattern.console",
