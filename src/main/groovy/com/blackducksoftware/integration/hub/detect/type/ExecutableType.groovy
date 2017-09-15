@@ -45,6 +45,7 @@ enum ExecutableType {
     PIP3([(OperatingSystemType.WINDOWS): 'pip3.exe', (OperatingSystemType.LINUX): 'pip3']),
     PYTHON([(OperatingSystemType.WINDOWS): 'python.exe', (OperatingSystemType.LINUX): 'python']),
     PYTHON3([(OperatingSystemType.WINDOWS): 'python3.exe', (OperatingSystemType.LINUX): 'python3']),
+    REBAR3([(OperatingSystemType.WINDOWS): 'rebar3.exe', (OperatingSystemType.LINUX): 'rebar3']),
     VIRTUALENV([(OperatingSystemType.WINDOWS): 'virtualenv.exe', (OperatingSystemType.LINUX): 'virtualenv'])
 
     private Map<OperatingSystemType, String> osToExecutableMap = [:]

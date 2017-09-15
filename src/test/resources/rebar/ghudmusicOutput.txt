@@ -1,0 +1,13 @@
+===> Verifying dependencies...
+└─ ghudmusic_lib─0.1.0 (project app)
+   ├─ erlpass─1.0.3 (git repo)
+   │  └─ bcrypt─0.5.0.3+build.92.refa63df34 (git repo)
+   ├─ mixer─0.1.5 (git repo)
+   ├─ sumo_db─0.6.1 (git repo)
+   │  ├─ lager─3.2.1 (hex package)
+   │  │  └─ goldrush─0.1.8 (hex package)
+   │  ├─ uuid─1.5.2-rc1 (hex package)
+   │  │  └─ quickrand─1.5.4 (hex package)
+   │  └─ worker_pool─2.0.1 (hex package)
+   └─ sumo_db_mysql─0.0.2 (git repo)
+      └─ emysql─0.4.4 (hex package)
