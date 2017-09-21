@@ -96,14 +96,33 @@ class PearDependencyFinder {
     }
 
     private Set<DependencyNode> createPearDependencyNodeFromList(String list, List<String> dependencyNames) {
+        Set<DependencyNode> parsedDependencies = []
+        String[] channelList = list.split('=')
+        channelList -= ''
+
+        channelList.eachWithIndex { String channelItem, row ->
+            if (row != 0) {
+                parsedDependencies.addAll(parseChannelBlock(channelItem, dependencyNames))
+            }
+        }
+
+        parsedDependencies
+    }
+
+    private Set<DependencyNode> parseChannelBlock(String list, List<String> dependencyNames) {
         Set<DependencyNode> childrenNodes = []
         String[] dependencyList = list.split(System.lineSeparator())
+        String packagesNotInstalled = '(no packages installed)'
 
-        if (dependencyList.size() > 3) {
-            def listing = dependencyList[3..-1]
-            listing.each { line ->
+        if (!dependencyList.contains(packagesNotInstalled)) {
+            def listing = dependencyList[2..-1]
+            for (String line : listing) {
                 String[] dependencyInfo = line.trim().split(' ')
                 dependencyInfo -= ''
+
+                if (!dependencyInfo) {
+                    break;
+                }
 
                 String packageName = dependencyInfo[0].trim()
                 String packageVersion = dependencyInfo[1].trim()
