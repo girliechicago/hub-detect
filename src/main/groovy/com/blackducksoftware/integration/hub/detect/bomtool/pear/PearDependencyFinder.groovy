@@ -40,6 +40,9 @@ import groovy.transform.TypeChecked
 @Component
 @TypeChecked
 class PearDependencyFinder {
+    private static final String EQUALS_LINE = '==='
+    private static final String DEPENDENCY_TYPE_PACKAGE = 'package'
+
     private final Logger logger = LoggerFactory.getLogger(PearDependencyFinder.class)
 
     @Autowired
@@ -98,7 +101,7 @@ class PearDependencyFinder {
         def isSkipNextLine = true
         String[] eachLine = list.split(System.lineSeparator())
         eachLine.each { String line ->
-            if (line.contains('===') || line.empty) {
+            if (line.contains(EQUALS_LINE) || line.empty) {
                 isSkipNextLine = true
             } else if (isSkipNextLine) {
                 isSkipNextLine = false
@@ -122,7 +125,7 @@ class PearDependencyFinder {
         if (isCheckInstalledDependencies) {
             mapEntry = new AbstractMap.SimpleEntry<String, String>(lineSections.get(0), lineSections.get(1))
         } else {
-            if (lineSections.get(1).toLowerCase().equals('package')) {
+            if (lineSections.get(1).toLowerCase().equals(DEPENDENCY_TYPE_PACKAGE)) {
                 String messyDependencyName = lineSections.get(2)
                 int slashIndex = messyDependencyName.indexOf('/') + 1
                 String dependencyName = messyDependencyName.substring(slashIndex)
