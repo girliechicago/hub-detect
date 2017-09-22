@@ -32,16 +32,14 @@ class PearDependencyTest {
 
         def dependenciesList = testUtil.getResourceAsUTF8String('/pear/dependencies-list.txt')
 
-        List<String> actual = pearDependencyFinder.findDependencyNames(dependenciesList)
-        List<String> expected = [
+        Set<String> actual = pearDependencyFinder.findDependencyNames(dependenciesList)
+        Set<String> expected = [
             'Archive_Tar',
             'Structures_Graph',
             'Console_Getopt',
             'XML_Util',
             'PEAR_Frontend_Web',
-            'PEAR_Frontend_Gtk',
-            'xml',
-            'pcre'
+            'PEAR_Frontend_Gtk'
         ]
 
         Assert.assertEquals(expected, actual)
@@ -51,7 +49,7 @@ class PearDependencyTest {
     public void createPearDependencyNodeFromListTest() {
         def installedPackages = testUtil.getResourceAsUTF8String('/pear/installed-packages.txt')
 
-        def dependencyNames = [
+        Set<String> dependencyNames = [
             'Archive_Tar',
             'Console_Getopt',
             'Structures_Graph'

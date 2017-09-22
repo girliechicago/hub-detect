@@ -107,7 +107,7 @@ class PearDependencyFinder {
                 def lineSectionsList = lineSections.toList()
                 lineSectionsList.removeAll('')
                 def dependency = getContentFromLine(lineSectionsList, isCheckInstalledDependencies)
-                if (dependency != null) {
+                if (dependency != null && !dependencies.containsKey(dependency.key)) {
                     dependencies.put(dependency.key, dependency.value)
                 }
             }
