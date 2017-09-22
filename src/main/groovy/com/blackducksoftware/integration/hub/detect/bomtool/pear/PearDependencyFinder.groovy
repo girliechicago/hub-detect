@@ -22,7 +22,6 @@
  */
 package com.blackducksoftware.integration.hub.detect.bomtool.pear
 
-import org.apache.commons.lang3.BooleanUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -67,74 +66,70 @@ class PearDependencyFinder {
         childNodes
     }
 
-    private List<String> findDependencyNames(String list) {
-        def nameList = []
-        String[] content = list.split(System.lineSeparator())
+    private Set<String> findDependencyNames(String list) {
+        Map<String, String> cleanDependencyList = cleanDependencyList(list, false)
+        if (!detectConfiguration.pearNotRequiredDependencies) {
+            def iterator = cleanDependencyList.entrySet().iterator()
 
-        if (content.size() > 5) {
-            def listing = content[5..-1]
-            listing.each { line ->
-                String[] dependencyInfo = line.trim().split(' ')
-                dependencyInfo -= ''
-
-                String dependencyName = dependencyInfo[2].trim()
-                String dependencyRequired = dependencyInfo[0].trim()
-
-                if (dependencyName) {
-                    if (detectConfiguration.getPearNotRequiredDependencies()) {
-                        nameList.add(dependencyName.split('/')[-1])
-                    } else {
-                        if (BooleanUtils.toBoolean(dependencyRequired)) {
-                            nameList.add(dependencyName.split('/')[-1])
-                        }
-                    }
+            while (iterator.hasNext()) {
+                if (iterator.next().value.toLowerCase().equals('no')) {
+                    iterator.remove()
                 }
             }
         }
-
-        nameList
+        return cleanDependencyList.keySet()
     }
 
-    private Set<DependencyNode> createPearDependencyNodeFromList(String list, List<String> dependencyNames) {
-        Set<DependencyNode> parsedDependencies = []
-        String[] channelList = list.split('=')
-        channelList -= ''
+    private Set<DependencyNode> createPearDependencyNodeFromList(String list, Set<String> dependencyNames) {
+        Set<DependencyNode> dependencyNodes = []
+        Map<String, String> installedDependencies = cleanDependencyList(list, true)
 
-        channelList.eachWithIndex { String channelItem, row ->
-            if (row != 0) {
-                parsedDependencies.addAll(parseChannelBlock(channelItem, dependencyNames))
+        dependencyNames.each { String dependencyKey ->
+            if (installedDependencies.containsKey(dependencyKey)) {
+                dependencyNodes.add(new DependencyNode(dependencyKey, installedDependencies.getAt(dependencyKey), new NameVersionExternalId(Forge.PEAR, dependencyKey, installedDependencies.getAt(dependencyKey))))
             }
         }
 
-        parsedDependencies
+        dependencyNodes
     }
 
-    private Set<DependencyNode> parseChannelBlock(String list, List<String> dependencyNames) {
-        Set<DependencyNode> childrenNodes = []
-        String[] dependencyList = list.split(System.lineSeparator())
-        String packagesNotInstalled = '(no packages installed)'
-
-        if (!dependencyList.contains(packagesNotInstalled)) {
-            def listing = dependencyList[2..-1]
-            for (String line : listing) {
-                String[] dependencyInfo = line.trim().split(' ')
-                dependencyInfo -= ''
-
-                if (!dependencyInfo) {
-                    break;
-                }
-
-                String packageName = dependencyInfo[0].trim()
-                String packageVersion = dependencyInfo[1].trim()
-
-                if (dependencyInfo && dependencyNames.contains(packageName)) {
-                    def newNode = new DependencyNode(packageName, packageVersion, new NameVersionExternalId(Forge.PEAR, packageName, packageVersion))
-
-                    childrenNodes.add(newNode)
+    private Map<String, String> cleanDependencyList(String list, boolean isCheckInstalledDependencies) {
+        def dependencies = [:]
+        def isSkipNextLine = true
+        String[] eachLine = list.split(System.lineSeparator())
+        eachLine.each { String line ->
+            if (line.contains('===') || line.empty) {
+                isSkipNextLine = true
+            } else if (isSkipNextLine) {
+                isSkipNextLine = false
+            } else {
+                String[] lineSections = line.split(' ')
+                def lineSectionsList = lineSections.toList()
+                lineSectionsList.removeAll('')
+                def dependency = getContentFromLine(lineSectionsList, isCheckInstalledDependencies)
+                if (dependency != null) {
+                    dependencies.put(dependency.key, dependency.value)
                 }
             }
         }
 
-        childrenNodes
+        dependencies
+    }
+
+    private Map.Entry<String, String> getContentFromLine(List<String> lineSections, boolean isCheckInstalledDependencies) {
+        Map.Entry<String, String> mapEntry
+
+        if (isCheckInstalledDependencies) {
+            mapEntry = new AbstractMap.SimpleEntry<String, String>(lineSections.get(0), lineSections.get(1))
+        } else {
+            if (lineSections.get(1).toLowerCase().equals('package')) {
+                String messyDependencyName = lineSections.get(2)
+                int slashIndex = messyDependencyName.indexOf('/') + 1
+                String dependencyName = messyDependencyName.substring(slashIndex)
+                mapEntry = new AbstractMap.SimpleEntry<String, String>(dependencyName, lineSections.get(0))
+            }
+        }
+
+        mapEntry
     }
 }
