@@ -31,9 +31,7 @@ import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
 import com.blackducksoftware.integration.hub.bdio.simple.model.Forge
 import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.NameVersionExternalId
 import com.blackducksoftware.integration.hub.detect.DetectConfiguration
-import com.blackducksoftware.integration.hub.detect.util.DetectFileManager
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableOutput
-import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableRunner
 
 import groovy.transform.TypeChecked
 
@@ -46,25 +44,23 @@ class PearDependencyFinder {
     private final Logger logger = LoggerFactory.getLogger(PearDependencyFinder.class)
 
     @Autowired
-    DetectFileManager detectFileManager
-
-    @Autowired
-    ExecutableRunner executableRunner
-
-    @Autowired
     DetectConfiguration detectConfiguration
 
     public Set<DependencyNode> parsePearDependencyList(ExecutableOutput pearListing, ExecutableOutput pearDependencies) {
         Set<DependencyNode> childNodes = []
 
         if (pearDependencies.errorOutput || pearListing.errorOutput) {
-            logger.error("There was an error during execution.")
+            logger.error("There was an error during execution.\nPear dependency list error ${pearListing.errorOutput}\nPear installed dependencies list error ${pearDependencies.errorOutput}")
+            if (!pearDependencies.standardOutput && !pearListing.standardOutput) {
+                return childNodes
+            }
         } else if (!pearDependencies.standardOutput || !pearListing.standardOutput) {
-            logger.error("No information retrieved from running pear commands")
-        } else {
-            def nameList = findDependencyNames(pearDependencies.standardOutput)
-            childNodes = createPearDependencyNodeFromList(pearListing.standardOutput, nameList)
+            logger.error("Not enough information retrieved from running pear commands")
+            return childNodes
         }
+
+        def nameList = findDependencyNames(pearDependencies.standardOutput)
+        childNodes = createPearDependencyNodeFromList(pearListing.standardOutput, nameList)
 
         childNodes
     }
@@ -109,7 +105,7 @@ class PearDependencyFinder {
                 String[] lineSections = line.split(' ')
                 def lineSectionsList = lineSections.toList()
                 lineSectionsList.removeAll('')
-                def dependency = getContentFromLine(lineSectionsList, isCheckInstalledDependencies)
+                Map.Entry<String, String> dependency = getContentFromLine(lineSectionsList, isCheckInstalledDependencies)
                 if (dependency != null && !dependencies.containsKey(dependency.key)) {
                     dependencies.put(dependency.key, dependency.value)
                 }
