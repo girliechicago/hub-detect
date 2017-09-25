@@ -22,6 +22,7 @@
  */
 package com.blackducksoftware.integration.hub.detect.bomtool.pear
 
+import org.apache.commons.lang3.BooleanUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +32,7 @@ import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
 import com.blackducksoftware.integration.hub.bdio.simple.model.Forge
 import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.NameVersionExternalId
 import com.blackducksoftware.integration.hub.detect.DetectConfiguration
+import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNodeImpl
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableOutput
 
 import groovy.transform.TypeChecked
@@ -46,89 +48,96 @@ class PearDependencyFinder {
     @Autowired
     DetectConfiguration detectConfiguration
 
-    public Set<DependencyNode> parsePearDependencyList(ExecutableOutput pearListing, ExecutableOutput pearDependencies) {
-        Set<DependencyNode> childNodes = []
-
-        if (pearDependencies.errorOutput || pearListing.errorOutput) {
-            logger.error("There was an error during execution.${System.lineSeparator()}Pear dependency list error: ${pearListing.errorOutput}${System.lineSeparator()}Pear installed dependencies list error: ${pearDependencies.errorOutput}")
-            if (!pearDependencies.standardOutput && !pearListing.standardOutput) {
-                return childNodes
+    public Set<DependencyNode> parsePearDependencyList(ExecutableOutput pearInstalledDependencies, ExecutableOutput pearPackageXmlDependencies) {
+        if (pearPackageXmlDependencies.errorOutput || pearInstalledDependencies.errorOutput) {
+            logger.error("There was an error during execution.${pearInstalledDependencies.errorOutput}${pearPackageXmlDependencies.errorOutput}")
+            if (!pearPackageXmlDependencies.standardOutput && !pearInstalledDependencies.standardOutput) {
+                return (Set<DependencyNode>) []
             }
-        } else if (!pearDependencies.standardOutput || !pearListing.standardOutput) {
+        } else if (!pearPackageXmlDependencies.standardOutput || !pearInstalledDependencies.standardOutput) {
             logger.error("Not enough information retrieved from running pear commands")
-            return childNodes
+            return (Set<DependencyNode>) []
         }
 
-        def nameList = findDependencyNames(pearDependencies.standardOutput)
-        childNodes = createPearDependencyNodeFromList(pearListing.standardOutput, nameList)
+        def dependenciesFromPackageXml = findDependencyNames(pearPackageXmlDependencies.standardOutput)
+        Set<DependencyNode> childNodes = createPearDependencyNodeFromList(pearInstalledDependencies.standardOutput, dependenciesFromPackageXml)
 
         childNodes
     }
 
-    private Set<String> findDependencyNames(String list) {
-        Map<String, String> cleanDependencyList = cleanDependencyList(list, false)
-        if (!detectConfiguration.pearNotRequiredDependencies) {
-            def iterator = cleanDependencyList.entrySet().iterator()
+    private Set<String> findDependencyNames(String packageXmlDependencies) {
+        Set<String> dependenciesList = []
+        List<String> cleanedDependenciesList = cleanExecutableOutput(packageXmlDependencies)
 
-            while (iterator.hasNext()) {
-                if (iterator.next().value.toLowerCase().equals('no')) {
-                    iterator.remove()
+        cleanedDependenciesList.each {
+            PackageXmlDependency packageDependency= createDependencyFromPackageXml(it)
+            if (packageDependency.type.equalsIgnoreCase(DEPENDENCY_TYPE_PACKAGE)) {
+                if (detectConfiguration.pearNotRequiredDependencies) {
+                    dependenciesList.add(packageDependency.name)
+                } else {
+                    if (packageDependency.required) {
+                        dependenciesList.add(packageDependency.name)
+                    }
                 }
             }
         }
-        return cleanDependencyList.keySet()
+
+        dependenciesList
     }
 
-    private Set<DependencyNode> createPearDependencyNodeFromList(String list, Set<String> dependencyNames) {
+    private Set<DependencyNode> createPearDependencyNodeFromList(String list, Set<String> packageXmlDependencyNames) {
         Set<DependencyNode> dependencyNodes = []
-        Map<String, String> installedDependencies = cleanDependencyList(list, true)
+        List<String> installedDependencies = cleanExecutableOutput(list)
 
-        dependencyNames.each { String dependencyKey ->
-            if (installedDependencies.containsKey(dependencyKey)) {
-                dependencyNodes.add(new DependencyNode(dependencyKey, installedDependencies.getAt(dependencyKey), new NameVersionExternalId(Forge.PEAR, dependencyKey, installedDependencies.getAt(dependencyKey))))
+        installedDependencies.each {
+            NameVersionNodeImpl dependencyItem = createDependencyNameVersion(it)
+            if (packageXmlDependencyNames.contains(dependencyItem.name)) {
+                dependencyNodes.add(new DependencyNode(dependencyItem.name, dependencyItem.version, new NameVersionExternalId(Forge.PEAR, dependencyItem.name, dependencyItem.version)))
             }
         }
 
         dependencyNodes
     }
 
-    private Map<String, String> cleanDependencyList(String list, boolean isCheckInstalledDependencies) {
-        def dependencies = [:]
-        def isSkipNextLine = true
-        String[] eachLine = list.split(System.lineSeparator())
-        eachLine.each { String line ->
-            if (line.contains(EQUALS_LINE) || line.empty) {
-                isSkipNextLine = true
-            } else if (isSkipNextLine) {
-                isSkipNextLine = false
-            } else {
-                String[] lineSections = line.split(' ')
-                def lineSectionsList = lineSections.toList()
-                lineSectionsList.removeAll('')
-                Map.Entry<String, String> dependency = getContentFromLine(lineSectionsList, isCheckInstalledDependencies)
-                if (dependency != null && !dependencies.containsKey(dependency.key)) {
-                    dependencies.put(dependency.key, dependency.value)
-                }
+    private List<String> cleanExecutableOutput(String executableOutput) {
+        def eachLine = executableOutput.split(System.lineSeparator()).toList()
+        eachLine.removeAll('')
+        def headerText = []
+
+        eachLine.eachWithIndex { line, index ->
+            if (line.contains(EQUALS_LINE)) {
+                headerText.add(eachLine.get(index - 1))
+                headerText.add(eachLine.get(index))
+                headerText.add(eachLine.get(index + 1))
             }
         }
 
-        dependencies
+        eachLine.removeAll(headerText)
+        eachLine
     }
 
-    private Map.Entry<String, String> getContentFromLine(List<String> lineSections, boolean isCheckInstalledDependencies) {
-        Map.Entry<String, String> mapEntry
+    private NameVersionNodeImpl createDependencyNameVersion(String installedDependency) {
+        def dependencyNameVersion = new NameVersionNodeImpl()
 
-        if (isCheckInstalledDependencies) {
-            mapEntry = new AbstractMap.SimpleEntry<String, String>(lineSections.get(0), lineSections.get(1))
-        } else {
-            if (lineSections.get(1).toLowerCase().equals(DEPENDENCY_TYPE_PACKAGE)) {
-                String messyDependencyName = lineSections.get(2)
-                int slashIndex = messyDependencyName.indexOf('/') + 1
-                String dependencyName = messyDependencyName.substring(slashIndex)
-                mapEntry = new AbstractMap.SimpleEntry<String, String>(dependencyName, lineSections.get(0))
-            }
-        }
+        def dependencyNameVersionParts = installedDependency.split(' ').toList()
+        dependencyNameVersionParts.removeAll('')
+        dependencyNameVersion.name = dependencyNameVersionParts[0]
+        dependencyNameVersion.version = dependencyNameVersionParts[1]
 
-        mapEntry
+        dependencyNameVersion
+    }
+
+    private PackageXmlDependency createDependencyFromPackageXml(String packageXmlDependencies) {
+        def packageDependency = new PackageXmlDependency()
+
+        def packageDependencyParts = packageXmlDependencies.split(' ').toList()
+        packageDependencyParts.removeAll('')
+        packageDependency.required = BooleanUtils.toBoolean(packageDependencyParts.get(0))
+        packageDependency.setType(packageDependencyParts.get(1))
+        String messyName = packageDependencyParts.get(2)
+        int slashIndex = messyName.indexOf('/') + 1
+        packageDependency.name = messyName.substring(slashIndex)
+
+        packageDependency
     }
 }

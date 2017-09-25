@@ -30,16 +30,13 @@ class PearDependencyTest {
         detectConfiguration.detectProperties = detectProperties
         pearDependencyFinder.detectConfiguration = detectConfiguration
 
-        def dependenciesList = testUtil.getResourceAsUTF8String('/pear/dependencies-list.txt')
+        def dependenciesList = testUtil.getResourceAsUTF8String('/pear/package-xml-dependencies-list.txt')
 
         Set<String> actual = pearDependencyFinder.findDependencyNames(dependenciesList)
         Set<String> expected = [
-            'Archive_Tar',
-            'Structures_Graph',
-            'Console_Getopt',
-            'XML_Util',
-            'PEAR_Frontend_Web',
-            'PEAR_Frontend_Gtk'
+            'Horde_Exception',
+            'Horde_Util',
+            'Horde_Xml_Element'
         ]
 
         Assert.assertEquals(expected, actual)
@@ -50,9 +47,9 @@ class PearDependencyTest {
         def installedPackages = testUtil.getResourceAsUTF8String('/pear/installed-packages.txt')
 
         Set<String> dependencyNames = [
-            'Archive_Tar',
-            'Console_Getopt',
-            'Structures_Graph'
+            'Horde_Exception',
+            'Horde_Util',
+            'Horde_Xml_Element'
         ]
         def actual = pearDependencyFinder.createPearDependencyNodeFromList(installedPackages, dependencyNames)
         def expected = testUtil.getResourceAsUTF8String('/pear/dependency-node-list.txt')
