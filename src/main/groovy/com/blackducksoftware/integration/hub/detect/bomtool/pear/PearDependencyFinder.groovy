@@ -59,7 +59,7 @@ class PearDependencyFinder {
             return (Set<DependencyNode>) []
         }
 
-        def dependenciesFromPackageXml = findDependencyNames(pearPackageXmlDependencies.standardOutput)
+        Set<String> dependenciesFromPackageXml = findDependencyNames(pearPackageXmlDependencies.standardOutput)
         Set<DependencyNode> childNodes = createPearDependencyNodeFromList(pearInstalledDependencies.standardOutput, dependenciesFromPackageXml)
 
         childNodes
