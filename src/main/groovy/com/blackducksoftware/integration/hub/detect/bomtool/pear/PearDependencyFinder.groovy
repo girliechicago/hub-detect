@@ -50,7 +50,7 @@ class PearDependencyFinder {
         Set<DependencyNode> childNodes = []
 
         if (pearDependencies.errorOutput || pearListing.errorOutput) {
-            logger.error("There was an error during execution.\nPear dependency list error ${pearListing.errorOutput}\nPear installed dependencies list error ${pearDependencies.errorOutput}")
+            logger.error("There was an error during execution.${System.lineSeparator()}Pear dependency list error: ${pearListing.errorOutput}${System.lineSeparator()}Pear installed dependencies list error: ${pearDependencies.errorOutput}")
             if (!pearDependencies.standardOutput && !pearListing.standardOutput) {
                 return childNodes
             }
