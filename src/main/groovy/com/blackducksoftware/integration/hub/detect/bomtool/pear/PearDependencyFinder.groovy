@@ -39,6 +39,7 @@ import groovy.transform.TypeChecked
 
 @Component
 @TypeChecked
+//TODO Separate the different parsing into multiple files.
 class PearDependencyFinder {
     private static final String EQUALS_LINE = '==='
     private static final String DEPENDENCY_TYPE_PACKAGE = 'package'
@@ -71,7 +72,8 @@ class PearDependencyFinder {
 
         cleanedDependenciesList.each {
             PackageXmlDependency packageDependency= createDependencyFromPackageXml(it)
-            if (packageDependency.type.equalsIgnoreCase(DEPENDENCY_TYPE_PACKAGE)) {
+            //TODO swap the comparison
+            if (packageDependency.type?.equalsIgnoreCase(DEPENDENCY_TYPE_PACKAGE)) {
                 if (detectConfiguration.pearNotRequiredDependencies) {
                     dependenciesList.add(packageDependency.name)
                 } else {
@@ -85,6 +87,7 @@ class PearDependencyFinder {
         dependenciesList
     }
 
+    //TODO change list name to something
     private Set<DependencyNode> createPearDependencyNodeFromList(String list, Set<String> packageXmlDependencyNames) {
         Set<DependencyNode> dependencyNodes = []
         List<String> installedDependencies = cleanExecutableOutput(list)
@@ -99,27 +102,30 @@ class PearDependencyFinder {
         dependencyNodes
     }
 
+    //TODO Create second list by adding the items I need
     private List<String> cleanExecutableOutput(String executableOutput) {
-        def eachLine = executableOutput.split(System.lineSeparator()).toList()
-        eachLine.removeAll('')
+        def lines = executableOutput.split(System.lineSeparator()).toList()
+        lines.removeAll('')
         def headerText = []
 
-        eachLine.eachWithIndex { line, index ->
+        lines.eachWithIndex { line, index ->
             if (line.contains(EQUALS_LINE)) {
-                headerText.add(eachLine.get(index - 1))
-                headerText.add(eachLine.get(index))
-                headerText.add(eachLine.get(index + 1))
+                headerText.add(lines.get(index - 1))
+                headerText.add(lines.get(index))
+                //TODO check array size
+                headerText.add(lines.get(index + 1))
             }
         }
 
-        eachLine.removeAll(headerText)
-        eachLine
+        lines.removeAll(headerText)
+        lines
     }
 
     private NameVersionNodeImpl createDependencyNameVersion(String installedDependency) {
         def dependencyNameVersion = new NameVersionNodeImpl()
 
-        def dependencyNameVersionParts = installedDependency.split(' ').toList()
+        //TODO lookup whitespace regex
+        def dependencyNameVersionParts = installedDependency.split('\\W+').toList()
         dependencyNameVersionParts.removeAll('')
         dependencyNameVersion.name = dependencyNameVersionParts[0]
         dependencyNameVersion.version = dependencyNameVersionParts[1]
