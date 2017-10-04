@@ -11,15 +11,14 @@
  */
 package com.blackducksoftware.integration.hub.detect.bomtool.go
 
-import java.nio.charset.StandardCharsets
-
-import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Test
-import org.skyscreamer.jsonassert.JSONAssert
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalIdFactory
 import com.blackducksoftware.integration.hub.detect.bomtool.go.vndr.VndrParser
+import com.blackducksoftware.integration.hub.detect.testutils.DependencyGraphTestUtil
+import com.blackducksoftware.integration.hub.detect.testutils.TestUtil
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
@@ -28,13 +27,14 @@ class VndrParserTest {
 
     @Test
     public void vndrParserTest() throws IOException {
-        final VndrParser vndrParser = new VndrParser();
-        final String vendorConfContents = IOUtils.toString(getClass().getResourceAsStream("/go/vendor.conf"), StandardCharsets.UTF_8);
-        final List<DependencyNode> dependencies = vndrParser.parseVendorConf(vendorConfContents);
-        Assert.assertNotNull(dependencies)
+        def testUtil = new TestUtil()
+        final VndrParser vndrParser = new VndrParser()
+        vndrParser.externalIdFactory = new ExternalIdFactory()
 
-        final String actual = gson.toJson(dependencies)
-        final String expected = IOUtils.toString(getClass().getResourceAsStream("/go/Go_VndrExpected.json"), StandardCharsets.UTF_8)
-        JSONAssert.assertEquals(expected, actual, false);
+        final List<String> vendorConfContents = testUtil.getResourceAsUTF8String('/go/vendor.conf').split('\n').toList()
+        final DependencyGraph dependencyGraph = vndrParser.parseVendorConf(vendorConfContents)
+
+        Assert.assertNotNull(dependencyGraph)
+        DependencyGraphTestUtil.assertGraph('/go/Go_VndrExpected_graph.json', dependencyGraph)
     }
 }

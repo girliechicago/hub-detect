@@ -155,7 +155,7 @@ class DetectConfiguration {
     public void logConfiguration() {
         List<String> configurationPieces = []
         configurationPieces.add('')
-        configurationPieces.add("Detect Version: ${buildInfo.getDetectVersion()}" as String)
+        configurationPieces.add("Detect Version: ${buildInfo.detectVersion}" as String)
         configurationPieces.add('Current property values:')
         configurationPieces.add('-'.multiply(60))
         def propertyFields = DetectProperties.class.getDeclaredFields().findAll {
@@ -200,6 +200,9 @@ class DetectConfiguration {
     public boolean getTestConnection() {
         return BooleanUtils.toBoolean(detectProperties.testConnection)
     }
+    public long getApiTimeout() {
+        return convertLong(detectProperties.apiTimeout)
+    }
     public String getHubUrl() {
         return detectProperties.hubUrl
     }
@@ -227,8 +230,8 @@ class DetectConfiguration {
     public boolean getHubOfflineMode() {
         return BooleanUtils.toBoolean(detectProperties.hubOfflineMode)
     }
-    public boolean getHubAutoImportCertificate() {
-        return BooleanUtils.toBoolean(detectProperties.hubAutoImportCertificate)
+    public boolean getHubTrustCertificate() {
+        return BooleanUtils.toBoolean(detectProperties.hubTrustCertificate)
     }
     public String getSourcePath() {
         return detectProperties.sourcePath
@@ -265,9 +268,6 @@ class DetectConfiguration {
     }
     public boolean getPolicyCheck() {
         return BooleanUtils.toBoolean(detectProperties.policyCheck)
-    }
-    public long getPolicyCheckTimeout() {
-        return convertLong(detectProperties.policyCheckTimeout)
     }
     public String getGradleInspectorVersion() {
         return detectProperties.gradleInspectorVersion
@@ -317,6 +317,9 @@ class DetectConfiguration {
     public String getMavenIncludedModuleNames() {
         return detectProperties.mavenIncludedModuleNames
     }
+    public String getMavenBuildCommand() {
+        return detectProperties.mavenBuildCommand
+    }
     public String getNugetPath() {
         return detectProperties.nugetPath
     }
@@ -332,23 +335,17 @@ class DetectConfiguration {
     public String getPearPath() {
         return detectProperties.pearPath
     }
-    public boolean getPearNotRequiredDependencies() {
-        return BooleanUtils.toBoolean(detectProperties.pearNotRequiredDependencies)
+    public boolean getPearOnlyRequiredDependencies() {
+        return BooleanUtils.toBoolean(detectProperties.pearOnlyRequiredDependencies)
     }
     public String getPipProjectName() {
         return detectProperties.pipProjectName
     }
-    public boolean getPipThreeOverride() {
-        return BooleanUtils.toBoolean(detectProperties.pipThreeOverride)
+    public boolean getPythonThreeOverride() {
+        return BooleanUtils.toBoolean(detectProperties.pythonThreeOverride)
     }
     public String getPythonPath() {
         return detectProperties.pythonPath
-    }
-    public String getPipPath() {
-        return detectProperties.pipPath
-    }
-    public String getVirtualEnvPath() {
-        return detectProperties.virtualEnvPath
     }
     public String getRequirementsFilePath() {
         return detectProperties.requirementsFilePath

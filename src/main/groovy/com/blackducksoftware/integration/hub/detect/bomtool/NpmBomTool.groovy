@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
 import com.blackducksoftware.integration.hub.detect.DetectConfiguration
 import com.blackducksoftware.integration.hub.detect.bomtool.npm.NpmCliDependencyFinder
 import com.blackducksoftware.integration.hub.detect.bomtool.npm.NpmLockfilePackager
@@ -54,7 +53,7 @@ class NpmBomTool extends BomTool {
     private String npmExePath
 
     @Autowired
-    NpmCliDependencyFinder cliDependencyFinder
+    NpmCliDependencyFinder npmCliDependencyFinder
 
     @Autowired
     NpmLockfilePackager npmLockfilePackager
@@ -101,9 +100,11 @@ class NpmBomTool extends BomTool {
             } else {
                 npmLsExe = new Executable(new File(sourcePath), npmExePath, ['-version'])
                 String npmNodePath = detectConfiguration.getNpmNodePath()
-                int lastSlashIndex = npmNodePath.lastIndexOf('/')
-                npmNodePath = npmNodePath.substring(0, lastSlashIndex)
-                if (npmNodePath) {
+                if (!npmNodePath.isEmpty()) {
+                    int lastSlashIndex = npmNodePath.lastIndexOf('/')
+                    if (lastSlashIndex >= 0) {
+                        npmNodePath = npmNodePath.substring(0, lastSlashIndex)
+                    }
                     npmLsExe.environmentVariables.put('PATH', npmNodePath)
                 }
                 logger.debug("Npm version ${executableRunner.execute(npmLsExe).standardOutput}")
@@ -130,13 +131,16 @@ class NpmBomTool extends BomTool {
             codeLocations.addAll(extractFromLockFile(shrinkwrapJson))
         }
 
+        if (!codeLocations.empty) {
+            hubSignatureScanner.registerPathToScan(sourceDirectory, NODE_MODULES)
+        }
+
         codeLocations
     }
 
     private List<DetectCodeLocation> extractFromLockFile(File lockFile) {
         String lockFileText = lockFile.getText()
-        DependencyNode npmProjectNode = npmLockfilePackager.parse(lockFileText)
-        def detectCodeLocation = new DetectCodeLocation(getBomToolType(), sourcePath, npmProjectNode)
+        DetectCodeLocation detectCodeLocation = npmLockfilePackager.parse(sourcePath, lockFileText)
 
         [detectCodeLocation]
     }
@@ -150,20 +154,20 @@ class NpmBomTool extends BomTool {
         if (!includeDevDeps) {
             exeArgs.add('-prod')
         }
-        npmLsExe.setExecutableArguments(exeArgs)
+        npmLsExe.executableArguments = exeArgs
         executableRunner.executeToFile(npmLsExe, npmLsOutputFile, npmLsErrorFile)
 
         if (npmLsOutputFile.length() > 0) {
             if (npmLsErrorFile.length() > 0) {
-                logger.debug("Error when running npm ls -json command\n${npmLsErrorFile.text}")
+                logger.debug("Error when running npm ls -json command")
+                logger.debug(npmLsErrorFile.text)
             }
-            def dependencyNode = cliDependencyFinder.generateDependencyNode(npmLsOutputFile)
-            def detectCodeLocation = new DetectCodeLocation(getBomToolType(), sourcePath, dependencyNode)
+            def detectCodeLocation = npmCliDependencyFinder.generateCodeLocation(sourcePath, npmLsOutputFile)
 
-            hubSignatureScanner.registerPathToScan(sourceDirectory, NODE_MODULES)
             return [detectCodeLocation]
         } else if (npmLsErrorFile.length() > 0) {
-            logger.error("Error when running npm ls -json command\n${npmLsErrorFile.text}")
+            logger.error("Error when running npm ls -json command")
+            logger.debug(npmLsErrorFile.text)
         } else {
             logger.warn("Nothing returned from npm ls -json command")
         }

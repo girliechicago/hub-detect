@@ -16,21 +16,23 @@ import static org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalIdFactory
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNodeTransformer
+import com.blackducksoftware.integration.hub.detect.testutils.DependencyGraphTestUtil
 import com.blackducksoftware.integration.hub.detect.testutils.TestUtil
 
 class CpanPackagerTest {
     private final TestUtil testUtil = new TestUtil()
     private final CpanPackager cpanPackager = new CpanPackager()
 
-    private final String cpanListText = testUtil.getResourceAsUTF8String('cpan/cpanList.txt')
-    private final String showDepsText = testUtil.getResourceAsUTF8String('cpan/showDeps.txt')
+    private final List<String> cpanListText = testUtil.getResourceAsUTF8String('cpan/cpanList.txt').split('\n').toList()
+    private final List<String> showDepsText = testUtil.getResourceAsUTF8String('cpan/showDeps.txt').split('\n').toList()
 
     @Before
     public void init() {
         cpanPackager.cpanListParser = new CpanListParser()
-        cpanPackager.nameVersionNodeTransformer = new NameVersionNodeTransformer()
+        cpanPackager.nameVersionNodeTransformer = new NameVersionNodeTransformer(new ExternalIdFactory())
     }
 
     @Test
@@ -45,7 +47,8 @@ class CpanPackagerTest {
 
     @Test
     public void makeDependencyNodesTest() {
-        Set<DependencyNode> dependencyNodes = cpanPackager.makeDependencyNodes(cpanListText, showDepsText)
-        testUtil.testJsonResource('cpan/expectedDependencyNodes.json', dependencyNodes)
+        DependencyGraph dependencyGraph = cpanPackager.makeDependencyGraph(cpanListText, showDepsText)
+
+        DependencyGraphTestUtil.assertGraph('/cpan/expectedDependencyNodes_graph.json', dependencyGraph)
     }
 }

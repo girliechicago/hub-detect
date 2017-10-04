@@ -23,16 +23,17 @@
 package com.blackducksoftware.integration.hub.detect.bomtool
 
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
-import com.blackducksoftware.integration.hub.bdio.simple.model.Forge
-import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.ExternalId
-import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.PathExternalId
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.Forge
+import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalId
+import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalIdFactory
 import com.blackducksoftware.integration.hub.detect.bomtool.rubygems.RubygemsNodePackager
 import com.blackducksoftware.integration.hub.detect.model.BomToolType
 import com.blackducksoftware.integration.hub.detect.model.DetectCodeLocation
@@ -49,6 +50,9 @@ class RubygemsBomTool extends BomTool {
     @Autowired
     RubygemsNodePackager rubygemsNodePackager
 
+    @Autowired
+    ExternalIdFactory externalIdFactory
+
     BomToolType getBomToolType() {
         return BomToolType.RUBYGEMS
     }
@@ -61,13 +65,12 @@ class RubygemsBomTool extends BomTool {
         File sourceDirectory = detectConfiguration.sourceDirectory
 
         def gemlockFile = new File(sourceDirectory, GEMFILE_LOCK_FILENAME)
-        String gemlockText = gemlockFile.getText(StandardCharsets.UTF_8.toString())
+        List<String> gemlockText = Files.readAllLines(gemlockFile.toPath(), StandardCharsets.UTF_8)
 
-        List<DependencyNode> dependencies = rubygemsNodePackager.extractProjectDependencies(gemlockText)
-        Set<DependencyNode> dependenciesSet = new HashSet<>(dependencies)
-        ExternalId externalId = new PathExternalId(Forge.RUBYGEMS, sourcePath)
+        DependencyGraph dependencyGraph = rubygemsNodePackager.extractProjectDependencies(gemlockText)
+        ExternalId externalId = externalIdFactory.createPathExternalId(Forge.RUBYGEMS, sourcePath)
 
-        def codeLocation = new DetectCodeLocation(getBomToolType(), sourcePath, externalId, dependenciesSet)
+        def codeLocation = new DetectCodeLocation(getBomToolType(), sourcePath, externalId, dependencyGraph)
         [codeLocation]
     }
 }

@@ -28,10 +28,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
-import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.NameVersionExternalId
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph
+import com.blackducksoftware.integration.hub.bdio.graph.MutableMapDependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.Forge
+import com.blackducksoftware.integration.hub.bdio.model.dependency.Dependency
+import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalIdFactory
 import com.blackducksoftware.integration.hub.detect.DetectConfiguration
-import com.blackducksoftware.integration.hub.detect.bomtool.PearBomTool
 import com.blackducksoftware.integration.hub.detect.util.DetectFileManager
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableOutput
 import com.blackducksoftware.integration.hub.detect.util.executable.ExecutableRunner
@@ -52,24 +55,27 @@ class PearDependencyFinder {
     @Autowired
     DetectConfiguration detectConfiguration
 
-    public Set<DependencyNode> parsePearDependencyList(ExecutableOutput pearListing, ExecutableOutput pearDependencies) {
-        Set<DependencyNode> childNodes = []
+    @Autowired
+    ExternalIdFactory externalIdFactory
+
+
+    public DependencyGraph parsePearDependencyList(ExecutableOutput pearListing, ExecutableOutput pearDependencies) {
+        DependencyGraph graph = new MutableMapDependencyGraph()
 
         if (pearDependencies.errorOutput || pearListing.errorOutput) {
             logger.error("There was an error during execution.")
         } else if (!pearDependencies.standardOutput || !pearListing.standardOutput) {
             logger.error("No information retrieved from running pear commands")
         } else {
-            def nameList = findDependencyNames(pearDependencies.standardOutput)
-            childNodes = createPearDependencyNodeFromList(pearListing.standardOutput, nameList)
+            def nameList = findDependencyNames(pearDependencies.standardOutputAsList)
+            graph = createPearDependencyGraphFromList(pearListing.standardOutputAsList, nameList)
         }
 
-        childNodes
+        graph
     }
 
-    private List<String> findDependencyNames(String list) {
+    private List<String> findDependencyNames(List<String> content) {
         def nameList = []
-        String[] content = list.split(System.lineSeparator())
 
         if (content.size() > 5) {
             def listing = content[5..-1]
@@ -81,7 +87,7 @@ class PearDependencyFinder {
                 String dependencyRequired = dependencyInfo[0].trim()
 
                 if (dependencyName) {
-                    if (detectConfiguration.getPearNotRequiredDependencies()) {
+                    if (!detectConfiguration.getPearOnlyRequiredDependencies()) {
                         nameList.add(dependencyName.split('/')[-1])
                     } else {
                         if (BooleanUtils.toBoolean(dependencyRequired)) {
@@ -95,9 +101,9 @@ class PearDependencyFinder {
         nameList
     }
 
-    private Set<DependencyNode> createPearDependencyNodeFromList(String list, List<String> dependencyNames) {
-        Set<DependencyNode> childrenNodes = []
-        String[] dependencyList = list.split(System.lineSeparator())
+
+    private DependencyGraph createPearDependencyGraphFromList(List<String> dependencyList, List<String> dependencyNames) {
+        MutableDependencyGraph graph = new MutableMapDependencyGraph()
 
         if (dependencyList.size() > 3) {
             def listing = dependencyList[3..-1]
@@ -109,13 +115,13 @@ class PearDependencyFinder {
                 String packageVersion = dependencyInfo[1].trim()
 
                 if (dependencyInfo && dependencyNames.contains(packageName)) {
-                    def newNode = new DependencyNode(packageName, packageVersion, new NameVersionExternalId(PearBomTool.PEAR, packageName, packageVersion))
+                    def child = new Dependency(packageName, packageVersion, externalIdFactory.createNameVersionExternalId(Forge.PEAR, packageName, packageVersion))
 
-                    childrenNodes.add(newNode)
+                    graph.addChildToRoot(child)
                 }
             }
         }
 
-        childrenNodes
+        graph
     }
 }

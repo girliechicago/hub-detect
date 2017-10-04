@@ -27,8 +27,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
-import com.blackducksoftware.integration.hub.detect.bomtool.CpanBomTool
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph
+import com.blackducksoftware.integration.hub.bdio.graph.MutableMapDependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.Forge
+import com.blackducksoftware.integration.hub.bdio.model.dependency.Dependency
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNode
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNodeTransformer
 
@@ -45,28 +48,28 @@ class CpanPackager {
     @Autowired
     NameVersionNodeTransformer nameVersionNodeTransformer
 
-    public Set<DependencyNode> makeDependencyNodes(String cpanListText, String directDependenciesText) {
+    public DependencyGraph makeDependencyGraph(List<String> cpanListText, List<String> directDependenciesText) {
         Map<String, NameVersionNode> allModules = cpanListParser.parse(cpanListText)
         List<String> directModuleNames = getDirectModuleNames(directDependenciesText)
 
-        Set<DependencyNode> dependencyNodes = []
+        MutableDependencyGraph graph = new MutableMapDependencyGraph()
         directModuleNames.each { moduleName ->
             def nameVersionNode = allModules[moduleName]
             if (nameVersionNode) {
                 nameVersionNode.name = nameVersionNode.name.replace('::', '-')
-                DependencyNode module = nameVersionNodeTransformer.createDependencyNode(CpanBomTool.CPAN_FORGE, nameVersionNode)
-                dependencyNodes.add(module)
+                Dependency module = nameVersionNodeTransformer.addNameVersionNodeToDependencyGraph(graph, Forge.CPAN, nameVersionNode)
+                graph.addChildToRoot(module)
             } else {
                 logger.warn("Could node find resolved version for module: ${moduleName}")
             }
         }
 
-        dependencyNodes
+        graph
     }
 
-    private List<String> getDirectModuleNames(String directDependenciesText) {
+    private List<String> getDirectModuleNames(List<String> directDependenciesText) {
         List<String> modules = []
-        for (String line : directDependenciesText.split(System.lineSeparator())) {
+        for (String line : directDependenciesText) {
             if (!line?.trim()) {
                 continue
             }

@@ -25,8 +25,11 @@ package com.blackducksoftware.integration.hub.detect.bomtool.rubygems
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
-import com.blackducksoftware.integration.hub.bdio.simple.model.Forge
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph
+import com.blackducksoftware.integration.hub.bdio.graph.MutableMapDependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.Forge
+import com.blackducksoftware.integration.hub.bdio.model.dependency.Dependency
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNode
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNodeImpl
 import com.blackducksoftware.integration.hub.detect.nameversion.NameVersionNodeTransformer
@@ -46,33 +49,31 @@ class GemlockNodeParser {
     private boolean inSpecsSection = false
     private boolean inDependenciesSection = false
 
-    List<DependencyNode> parseProjectDependencies(NameVersionNodeTransformer nameVersionNodeTransformer, final String gemfileLockContents) {
+    DependencyGraph parseProjectDependencies(NameVersionNodeTransformer nameVersionNodeTransformer, final List<String> gemfileLockLines) {
         rootNameVersionNode = new NameVersionNodeImpl([name: 'gemfileLockRoot'])
         nameVersionNodeBuilder = new NameVersionNodeBuilder(rootNameVersionNode)
         directDependencyNames = new HashSet<>()
         currentParent = null
 
-        List<DependencyNode> projectDependencies = []
-        String[] lines = gemfileLockContents.split(System.lineSeparator())
-        for (String line : lines) {
+        gemfileLockLines.each{ String line ->
             if (!line?.trim()) {
                 inSpecsSection = false
                 inDependenciesSection = false
-                continue
+                return
             }
 
-            if (!inSpecsSection && '  specs:' == line) {
+            if (!inSpecsSection && 'specs:'.equals(line.trim())) {
                 inSpecsSection = true
-                continue
+                return
             }
 
-            if (!inDependenciesSection && 'DEPENDENCIES' == line) {
+            if (!inDependenciesSection && 'DEPENDENCIES'.equals(line.trim())) {
                 inDependenciesSection = true
-                continue
+                return
             }
 
             if (!inSpecsSection && !inDependenciesSection) {
-                continue
+                return
             }
 
             //we are now either in the specs section or in the dependencies section
@@ -83,17 +84,19 @@ class GemlockNodeParser {
             }
         }
 
+        MutableDependencyGraph graph = new MutableMapDependencyGraph()
+
         directDependencyNames.each { directDependencyName ->
             NameVersionNode nameVersionNode = nameVersionNodeBuilder.nodeCache[directDependencyName]
             if (nameVersionNode) {
-                DependencyNode directDependencyNode = nameVersionNodeTransformer.createDependencyNode(Forge.RUBYGEMS, nameVersionNode)
-                projectDependencies.add(directDependencyNode)
+                Dependency directDependency = nameVersionNodeTransformer.addNameVersionNodeToDependencyGraph(graph, Forge.RUBYGEMS, nameVersionNode)
+                graph.addChildToRoot(directDependency)
             } else {
                 logger.debug("Could not find ${directDependencyName} in the populated map.")
             }
         }
 
-        projectDependencies
+        graph
     }
 
     private void parseSpecsSectionLine(String line) {

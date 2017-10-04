@@ -16,7 +16,10 @@ import static org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode
+import com.blackducksoftware.integration.hub.bdio.graph.DependencyGraph
+import com.blackducksoftware.integration.hub.bdio.model.dependency.Dependency
+import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalIdFactory
+import com.blackducksoftware.integration.hub.detect.testutils.DependencyGraphTestUtil
 import com.blackducksoftware.integration.hub.detect.testutils.TestUtil
 import com.google.gson.GsonBuilder
 
@@ -27,6 +30,7 @@ class CondaListParserTest {
     @Before
     public void init() {
         condaListParser.gson = new GsonBuilder().setPrettyPrinting().create()
+        condaListParser.externalIdFactory = new ExternalIdFactory()
     }
 
     @Test
@@ -36,26 +40,28 @@ class CondaListParserTest {
         element.name = 'sampleName'
         element.version = 'sampleVersion'
         element.buildString = 'py36_0'
-        DependencyNode dependencyNode = condaListParser.condaListElementToDependencyNodeTransformer(platform, element)
+        Dependency dependency = condaListParser.condaListElementToDependency(platform, element)
 
-        assertEquals('sampleName', dependencyNode.name)
-        assertEquals('sampleVersion-py36_0-linux', dependencyNode.version)
-        assertEquals('sampleName=sampleVersion-py36_0-linux', dependencyNode.externalId.createExternalId())
+        assertEquals('sampleName', dependency.name)
+        assertEquals('sampleVersion-py36_0-linux', dependency.version)
+        assertEquals('sampleName=sampleVersion-py36_0-linux', dependency.externalId.createExternalId())
     }
 
     @Test
     public void smallParseTest() {
         final String condaInfoJson = testUtil.getResourceAsUTF8String('conda/condaInfo.json')
         final String condaListJson = testUtil.getResourceAsUTF8String('conda/condaListSmall.json')
-        Set<DependencyNode> dependencyNodes = condaListParser.parse(condaListJson, condaInfoJson)
-        testUtil.testJsonResource('conda/condaListSmallExpected.json', dependencyNodes)
+        DependencyGraph dependencyGraph = condaListParser.parse(condaListJson, condaInfoJson)
+
+        DependencyGraphTestUtil.assertGraph('conda/condaListSmallExpected_graph.json', dependencyGraph)
     }
 
     @Test
     public void largeParseTest() {
         String condaInfoJson = testUtil.getResourceAsUTF8String('conda/condaInfo.json')
         String condaListJson = testUtil.getResourceAsUTF8String('conda/condaListLarge.json')
-        Set<DependencyNode> dependencyNodes = condaListParser.parse(condaListJson, condaInfoJson)
-        testUtil.testJsonResource('conda/condaListLargeExpected.json', dependencyNodes)
+        DependencyGraph dependencyGraph = condaListParser.parse(condaListJson, condaInfoJson)
+
+        DependencyGraphTestUtil.assertGraph('conda/condaListLargeExpected_graph.json', dependencyGraph)
     }
 }
