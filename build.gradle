@@ -154,8 +154,7 @@ artifacts {
     archives javadocJar
 }
 
-signing {
-    dependsOn build
+signing (dependsOn: build) {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     doLast {
     sign configurations.archives
