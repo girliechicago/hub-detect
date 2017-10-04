@@ -120,15 +120,20 @@ artifacts {
  releaseArtifacts file("build/libs/${name}-${version}.jar.asc")
 }
 
-signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.releaseArtifacts
-}
+//signing {
+//    required { gradle.taskGraph.hasTask("uploadArchives") }
+//    sign configurations.releaseArtifacts
+//}
 
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
+                File[] artifacts = deployment.getArtifacts().collect {
+                    it.getFile()
+                } as File[]
+                signing.sign(artifacts)
+                
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
