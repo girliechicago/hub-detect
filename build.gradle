@@ -8,11 +8,11 @@ buildscript {
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
     }
 }
-
 plugins {
     id 'groovy'
     id 'eclipse'
     id 'maven'
+    id 'signing'
     id 'org.springframework.boot' version '1.5.2.RELEASE'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.1'
@@ -87,3 +87,62 @@ license {
 }
 
 tasks.licenseMain.dependsOn(licenseFormatMain)
+
+gradle.taskGraph.whenReady {
+    if (gradle.taskGraph.hasTask(":uploadArchives")) {
+        println "Uploading ${rootProject.name} version ${version} to maven central."
+    }
+}
+
+artifacts {
+    archives jar
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment ->
+                signing.signPom(deployment)
+            }
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+            pom.project {
+                name rootProject.name
+                description rootProject.description
+                url 'https://www.github.com/blackducksoftware/integration-gradle-inspector'
+                packaging 'jar'
+                scm {
+                    connection 'scm:git:git://github.com/blackducksoftware/integration-gradle-inspector.git'
+                    developerConnection 'scm:git:git@github.com:blackducksoftware/integration-gradle-inspector.git'
+                    url 'https://www.github.com/blackducksoftware/integration-gradle-inspector'
+                }
+                licenses {
+                    license {
+                        name 'Apache License 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'blackduckoss'
+                        name 'Black Duck OSS'
+                        email 'bdsoss@blackducksoftware.com'
+                        organization 'Black Duck Software, Inc.'
+                        organizationUrl 'http://www.blackducksoftware.com'
+                        roles { role 'developer' }
+                        timezone 'America/New_York'
+                    }
+                }
+            }
+        }
+    }
+}
