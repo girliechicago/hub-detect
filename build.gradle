@@ -107,14 +107,10 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-configurations {
-    releaseArtifacts {}
-}
-
 artifacts {
- releaseArtifacts jar
- releaseArtifacts javadocJar
- releaseArtifacts sourcesJar
+ archives jar
+ archives javadocJar
+ archives sourcesJar
 }
 
 //signing {
@@ -130,8 +126,8 @@ uploadArchives {
                     println "signing artifact ${it.getFile().getAbsolutePath()}"
                     it.getFile()
                 } as File[]
-                signing.sign(artifacts)
-                
+               def obj = signing.sign(artifacts)
+                println "Return from sign ${obj}"
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
