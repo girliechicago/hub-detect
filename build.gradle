@@ -123,7 +123,7 @@ uploadArchives {
                 def files = deployment.getArtifacts().collect {
                     it.getFile()
                 }
-                signing.sign(files)
+                signing.sign(files as File[])
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
