@@ -106,19 +106,14 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives jar
+    archives bootRepackage
     archives sourcesJar
     archives javadocJar
 }
 
-task getStuffToSign(type: Jar, dependsOn: bootRepackage) {
-    from configurations.archives
-}
-
 signing{
     required { gradle.taskGraph.hasTask("uploadArchives") }
-//    sign configurations.archives
-   sign getStuffToSign
+    sign configurations.archives
 }
 
 uploadArchives {
