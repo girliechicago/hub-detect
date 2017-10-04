@@ -115,9 +115,6 @@ artifacts {
  releaseArtifacts jar
  releaseArtifacts javadocJar
  releaseArtifacts sourcesJar
- releaseArtifacts file("build/libs/${name}-${version}-javadoc.jar.asc")
- releaseArtifacts file("build/libs/${name}-${version}-sources.jar.asc")
- releaseArtifacts file("build/libs/${name}-${version}.jar.asc")
 }
 
 //signing {
@@ -130,6 +127,7 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
                 File[] artifacts = deployment.getArtifacts().collect {
+                    println "signing artifact ${it.getFile().getAbsolutePath()}"
                     it.getFile()
                 } as File[]
                 signing.sign(artifacts)
