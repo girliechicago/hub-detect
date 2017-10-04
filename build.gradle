@@ -117,7 +117,7 @@ task signArtifacts (dependsOn: uploadArchives){
         signing.sign( libDirectory.listFiles())
 }
 
-artifacts (dependsOn: signArtifacts){
+artifacts {
     File libDirectory = new File("${buildDir}/libs/")
     libDirectory.listFiles().each{
         archives it
