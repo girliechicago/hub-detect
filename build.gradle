@@ -111,11 +111,9 @@ artifacts {
     archives javadocJar
 }
 
-task getStuffToSign {
+task getStuffToSign(type: Jar, dependsOn: build) {
     configurations.archives
 }
-
-getStuffToSign.mustRunAfter build
 
 signing{
     required { gradle.taskGraph.hasTask("uploadArchives") }
