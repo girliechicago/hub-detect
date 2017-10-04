@@ -111,8 +111,8 @@ artifacts {
     archives javadocJar
 }
 
-task getStuffToSign(type: Configuration, dependsOn: build) {
-    configurations.archives
+task getStuffToSign(type: Jar, dependsOn: build) {
+    from configurations.archives
 }
 
 signing{
