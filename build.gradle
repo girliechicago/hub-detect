@@ -121,7 +121,7 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
                 println "signing artifacts now"
-                sign configurations.archives
+                signing.sign(configurations.archives)
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
