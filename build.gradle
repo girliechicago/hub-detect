@@ -1,3 +1,5 @@
+import java.io.File
+
 buildscript {
     repositories {
         mavenCentral()
@@ -105,25 +107,29 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-artifacts {
-    archives jar
-    archives sourcesJar
-    archives javadocJar
-}
-
 //signing{
 //    required { gradle.taskGraph.hasTask("uploadArchives") }
 //    sign configurations.archives
 //}
 
+task signArtifacts (dependsOn: bootRepackage){
+    if(gradle.taskGraph.hasTask("uploadArchives")) {
+        File libDirectory = new File("${buildDir}/libs/")
+        signing.sign( libDirectory.listFiles())
+    }
+}
+
+artifacts (dependsOn: signArtifacts){
+    File libDirectory = new File("${buildDir}/libs/")
+    libDirectory.listFiles().each{
+        archives it
+    }  
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
-                def files = deployment.getArtifacts().collect {
-                    it.getFile()
-                }
-                signing.sign(files as File[])
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
