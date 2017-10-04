@@ -106,8 +106,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
-sourcesJar.mustRunAfter(build)
-javadocJar.mustRunAfter(build)
+sourcesJar.mustRunAfter(jar)
+javadocJar.mustRunAfter(jar)
 
 //signing{
 //    required { gradle.taskGraph.hasTask("uploadArchives") }
