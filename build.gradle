@@ -111,6 +111,9 @@ artifacts {
  archives jar
  archives javadocJar
  archives sourcesJar
+ archives file("build/libs/${name}-${version}-javadoc.jar.asc")
+ archives file("build/libs/${name}-${version}-sources.jar.asc")
+ archives file("build/libs/${name}-${version}.jar.asc")
 }
 
 //signing {
@@ -123,11 +126,17 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
                 File[] artifacts = deployment.getArtifacts().collect {
-                    println "signing artifact ${it.getFile().getAbsolutePath()}"
-                    it.getFile()
+                    File file = it.getFile()
+                    if(file.exists()) {
+                    return file
+                    }
+                    return null;
                 } as File[]
-               def obj = signing.sign(artifacts)
-                println "Return from sign ${obj}"
+               SignOperation signOperation = signing.sign(artifacts)
+               signOperation.execute()
+
+               
+               
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
