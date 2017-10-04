@@ -106,25 +106,24 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
-sourcesJar.mustRunAfter(jar)
-javadocJar.mustRunAfter(jar)
 
-//signing{
-//    required { gradle.taskGraph.hasTask("uploadArchives") }
-//    sign configurations.archives
-//}
-
-task signArtifacts {
-        File libDirectory = new File("${buildDir}/libs/")
-        println "Signing things in ${libDirectory}"
-        signing.sign( libDirectory.listFiles())
+configurations {
+    releaseArtifacts {}
 }
 
-//artifacts {
-//    archives jar
-//    archives sourcesJar
-//    archives javadocJar
-//}
+artifacts {
+ releaseArtifacts jar
+ releaseArtifacts javadocJar
+ releaseArtifacts sourcesJar
+ releaseArtifacts file("build/libs/${name}-${version}-javadoc.jar.asc")
+ releaseArtifacts file("build/libs/${name}-${version}-sources.jar.asc")
+ releaseArtifacts file("build/libs/${name}-${version}.jar.asc")
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.releaseArtifacts
+}
 
 uploadArchives {
     repositories {
@@ -168,5 +167,4 @@ uploadArchives {
             }
         }
     }
-    uploadArchives.mustRunAfter(signArtifacts)
 }
