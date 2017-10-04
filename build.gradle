@@ -114,14 +114,14 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 task signArtifacts (dependsOn: uploadArchives){
         File libDirectory = new File("${buildDir}/libs/")
+        println "Signing things in ${libDirectory}"
         signing.sign( libDirectory.listFiles())
 }
 
 artifacts {
-    File libDirectory = new File("${buildDir}/libs/")
-    libDirectory.listFiles().each{
-        archives it
-    }  
+    archives jar
+    archives sourcesJar
+    archives javadocJar
 }
 
 uploadArchives {
