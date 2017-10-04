@@ -52,6 +52,7 @@ build {
         shellScriptFile.delete()
         shellScriptFile << shellScriptContents
         shellScriptFile.setExecutable(true)
+        signing()
     }
 }
 
