@@ -94,12 +94,6 @@ gradle.taskGraph.whenReady {
     }
 }
 
-artifacts {
-    archives jar
-    archives sourcesJar
-    archives javadocJar
-}
-
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -108,6 +102,12 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
 }
 
 signing {
