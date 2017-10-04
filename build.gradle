@@ -111,17 +111,22 @@ artifacts {
     archives javadocJar
 }
 
-//signing{
-//    required { gradle.taskGraph.hasTask("uploadArchives") }
+task getStuffToSign {
+    configurations.archives
+}
+
+getStuffToSign.mustRunAfter build
+
+signing{
+    required { gradle.taskGraph.hasTask("uploadArchives") }
 //    sign configurations.archives
-//}
+   sign getStuffToSign
+}
 
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
-                println "signing artifacts now"
-                signing.sign(configurations.archives)
                 signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
