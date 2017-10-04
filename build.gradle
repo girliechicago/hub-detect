@@ -112,11 +112,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 //    sign configurations.archives
 //}
 
-task signArtifacts (dependsOn: bootRepackage){
-    if(gradle.taskGraph.hasTask("uploadArchives")) {
+task signArtifacts (dependsOn: uploadArchives){
         File libDirectory = new File("${buildDir}/libs/")
         signing.sign( libDirectory.listFiles())
-    }
 }
 
 artifacts (dependsOn: signArtifacts){
