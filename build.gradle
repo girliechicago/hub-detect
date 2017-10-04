@@ -156,8 +156,6 @@ artifacts {
 
 signing{
     required { gradle.taskGraph.hasTask("uploadArchives") }
-    doLast {
     sign configurations.archives
-    }
 }
 signing.dependsOn build
