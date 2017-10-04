@@ -52,7 +52,6 @@ build {
         shellScriptFile.delete()
         shellScriptFile << shellScriptContents
         shellScriptFile.setExecutable(true)
-        signing()
     }
 }
 
@@ -156,6 +155,9 @@ artifacts {
 }
 
 signing {
+    dependsOn build
     required { gradle.taskGraph.hasTask("uploadArchives") }
+    doLast {
     sign configurations.archives
+    }
 }
