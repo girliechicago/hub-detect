@@ -106,7 +106,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives bootRepackage
+    archives jar
     archives sourcesJar
     archives javadocJar
 }
