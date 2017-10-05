@@ -97,12 +97,12 @@ gradle.taskGraph.whenReady {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+task sourcesJar(type: Jar, dependsOn: build) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: build) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
@@ -111,33 +111,32 @@ artifacts {
  archives jar
  archives javadocJar
  archives sourcesJar
- archives file("build/libs/${name}-${version}-javadoc.jar.asc")
- archives file("build/libs/${name}-${version}-sources.jar.asc")
- archives file("build/libs/${name}-${version}.jar.asc")
+// archives file("build/libs/${name}-${version}-javadoc.jar.asc")
+// archives file("build/libs/${name}-${version}-sources.jar.asc")
+// archives file("build/libs/${name}-${version}.jar.asc")
 }
 
-//signing {
-//    required { gradle.taskGraph.hasTask("uploadArchives") }
-//    sign configurations.releaseArtifacts
-//}
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
 
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
-                File[] artifacts = deployment.getArtifacts().collect {
-                    File file = it.getFile()
-                    if(file.exists()) {
-                    return file
-                    }
-                    return null;
-                } as File[]
-               SignOperation signOperation = signing.sign(artifacts)
-               signOperation.execute()
-
+//                File[] artifacts = deployment.getArtifacts().collect {
+//                     it.getFile()
+//                } as File[]
+//               SignOperation signOperation = signing.sign(artifacts)
+//               signOperation.execute()
+//               // add asc files to the deployment
+//               
+//               configurations.archives.artifacts.each{
+//                   
+//               }
                
-               
-                signing.signPom(deployment)
+               signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
                 authentication(userName: sonatypeUsername, password: sonatypePassword)
