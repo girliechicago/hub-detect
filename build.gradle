@@ -113,28 +113,26 @@ artifacts {
  archives sourcesJar
 }
 
-task customSigning(dependsOn: build) {
-    doLast {
-       // required { gradle.taskGraph.hasTask("uploadArchives") }
-        signing.sign configurations.archives
-    }
-}
+//task customSigning(dependsOn: build) {
+//       // required { gradle.taskGraph.hasTask("uploadArchives") }
+//        signing.sign configurations.archives
+//}
 
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment ->
-//                File[] artifacts = deployment.getArtifacts().collect {
-//                     it.getFile()
-//                } as File[]
-//               SignOperation signOperation = signing.sign(artifacts)
-//               signOperation.execute()
-//               // add asc files to the deployment
-//               
-//               configurations.archives.artifacts.each{
-//                   
-//               }
-               
+               File libDirectory = new File("${buildDir}/libs")
+               File[] jarFiles = libDirectory.listFiles(new FilenameFilter() {
+                   @Override
+                   boolean accept(File dir, String name) {
+                       if(name.endsWith(".jar")) {
+                           return true
+                       }
+                       return false
+                   }
+               })
+               signing.sign(jarFiles)
                signing.signPom(deployment)
             }
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
