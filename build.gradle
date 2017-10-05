@@ -133,6 +133,10 @@ uploadArchives {
                    }
                })
                signing.sign(jarFiles)
+               deployment.getArtifacts().each {
+                   println "Artifact ${it} name ${it.getFile().getName()}"
+               }
+               
                PublishArtifact establishedArtifact = deployment.getArtifacts().iterator().next()
 
                File[] signatureFiles = libDirectory.listFiles(new FilenameFilter() {
