@@ -114,8 +114,8 @@ artifacts {
 }
 
 task customSigning(dependsOn: build) {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
+   // required { gradle.taskGraph.hasTask("uploadArchives") }
+    signing.sign configurations.archives
 }
 
 uploadArchives {
