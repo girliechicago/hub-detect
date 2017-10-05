@@ -144,7 +144,7 @@ uploadArchives {
                        return false
                    }
                })
-               println "Artifact classifier ${artifact.getClassifier()}"
+               println "Artifact classifier ${establishedArtifact.getClassifier()}"
                signatureFiles.each { signature ->
                    def artifact = [getClassifier: establishedArtifact.getClassifier(), getDate: establishedArtifact.getDate(), getExtension: 'jar.asc',getFile: signature ,getName: signature.getName(), getType: 'jar.asc'] as PublishArtifact
                    deployment.addArtifact(aritfact)
