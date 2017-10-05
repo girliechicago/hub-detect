@@ -116,6 +116,7 @@ artifacts {
 }
 
 task customSigning {
+    doLast {
        // required { gradle.taskGraph.hasTask("uploadArchives") }
 //        signing.sign configurations.archives
     File libDirectory = new File("${buildDir}/libs")
@@ -129,6 +130,7 @@ task customSigning {
         }
     })
     signing.sign(jarFiles)
+    }
 }
 
 task createPom << {
