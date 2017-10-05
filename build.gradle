@@ -129,43 +129,46 @@ task customSigning {
             return false
         }
     })
+    println "signing jar files"
     signing.sign(jarFiles)
     }
 }
 
-task createPom << {
-    pom{
-        project {
-            name rootProject.name
-            description rootProject.description
-            url 'https://github.com/blackducksoftware/hub-detect'
-            packaging 'jar'
-            scm {
-                connection 'scm:git:git://github.com/blackducksoftware/hub-detect.git'
-                developerConnection 'scm:git:git@github.com:blackducksoftware/hub-detect.git'
-                url 'https://www.github.com/blackducksoftware/hub-detect'
-            }
-            licenses {
-                license {
-                    name 'Apache License 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0'
+task createPom  {
+    doLast {
+        pom{
+            project {
+                name rootProject.name
+                description rootProject.description
+                url 'https://github.com/blackducksoftware/hub-detect'
+                packaging 'jar'
+                scm {
+                    connection 'scm:git:git://github.com/blackducksoftware/hub-detect.git'
+                    developerConnection 'scm:git:git@github.com:blackducksoftware/hub-detect.git'
+                    url 'https://www.github.com/blackducksoftware/hub-detect'
+                }
+                licenses {
+                    license {
+                        name 'Apache License 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'blackduckoss'
+                        name 'Black Duck OSS'
+                        email 'bdsoss@blackducksoftware.com'
+                        organization 'Black Duck Software, Inc.'
+                        organizationUrl 'http://www.blackducksoftware.com'
+                        roles { role 'developer' }
+                        timezone 'America/New_York'
+                    }
                 }
             }
-            developers {
-                developer {
-                    id 'blackduckoss'
-                    name 'Black Duck OSS'
-                    email 'bdsoss@blackducksoftware.com'
-                    organization 'Black Duck Software, Inc.'
-                    organizationUrl 'http://www.blackducksoftware.com'
-                    roles { role 'developer' }
-                    timezone 'America/New_York'
-                }
-            }
-        }
-    }.writeTo("${buildDir}/poms/pom.xml")
-    File pomFile = file("${buildDir}/poms/pom.xml")
-    signing.sign(pomFile)
+        }.writeTo("${buildDir}/poms/pom.xml")
+        File pomFile = file("${buildDir}/poms/pom.xml")
+        signing.sign(pomFile)
+    }
 }
 
 //uploadArchives {
