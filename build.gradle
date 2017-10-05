@@ -133,7 +133,7 @@ uploadArchives {
                    }
                })
                signing.sign(jarFiles)
-               PublishArtifact artifact = deployment.getArtifacts().iterator().next()
+               PublishArtifact establishedArtifact = deployment.getArtifacts().iterator().next()
 
                File[] signatureFiles = libDirectory.listFiles(new FilenameFilter() {
                    @Override
@@ -146,7 +146,7 @@ uploadArchives {
                })
                println "Artifact classifier ${artifact.getClassifier()}"
                signatureFiles.each { signature ->
-                   def artifact = [getClassifier: artifact.getClassifier(), getDate: artifact.getDate(), getExtension: 'jar.asc',getFile: signature ,getName: signature.getName(), getType: 'jar.asc'] as PublishArtifact
+                   def artifact = [getClassifier: establishedArtifact.getClassifier(), getDate: establishedArtifact.getDate(), getExtension: 'jar.asc',getFile: signature ,getName: signature.getName(), getType: 'jar.asc'] as PublishArtifact
                    deployment.addArtifact(aritfact)
                }
                signing.signPom(deployment)
