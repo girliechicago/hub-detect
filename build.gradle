@@ -111,16 +111,6 @@ artifacts {
  archives jar
  archives javadocJar
  archives sourcesJar
- 
- File javaDocJarSignature = file("build/libs/${name}-${version}-javadoc.jar.asc")
- javaDocJarSignature.createNewFile()
- File sourcesJarSignature = file("build/libs/${name}-${version}-sources.jar.asc")
- sourcesJarSignature.createNewFile()
- File jarSignature = file("build/libs/${name}-${version}.jar.asc")
- jarSignature.createNewFile()
- archives file("build/libs/${name}-${version}-javadoc.jar.asc")
- archives file("build/libs/${name}-${version}-sources.jar.asc")
- archives file("build/libs/${name}-${version}.jar.asc")
 }
 
 //task customSigning(dependsOn: build) {
