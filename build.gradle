@@ -21,8 +21,6 @@ plugins {
     id 'com.github.hierynomus.license' version '0.14.0'
 }
 
-//apply plugin: 'maven'
-
 tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 
@@ -109,28 +107,20 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-artifacts {
- archives jar
- archives javadocJar
- archives sourcesJar
-}
-
 task customSigning {
     doLast {
-       // required { gradle.taskGraph.hasTask("uploadArchives") }
-//        signing.sign configurations.archives
-    File libDirectory = new File("${buildDir}/libs")
-    File[] jarFiles = libDirectory.listFiles(new FilenameFilter() {
-        @Override
-        boolean accept(File dir, String name) {
-            if(name.endsWith(".jar")) {
-                return true
+        File libDirectory = new File("${buildDir}/libs")
+        File[] jarFiles = libDirectory.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                if(name.endsWith(".jar")) {
+                    return true
+                }
+                return false
             }
-            return false
-        }
-    })
-    println "signing jar files"
-    signing.sign(jarFiles)
+        })
+        println "signing jar files"
+        signing.sign(jarFiles)
     }
 }
 
@@ -165,84 +155,8 @@ task createPom  {
                     }
                 }
             }
-        }.writeTo("${buildDir}/poms/pom.xml")
+        }.writeTo("${buildDir}/poms/${rootProject.name}-${rootProject.version}.pom")
         File pomFile = file("${buildDir}/poms/${rootProject.name}-${rootProject.version}.pom")
         signing.sign(pomFile)
     }
 }
-
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            beforeDeployment { MavenDeployment deployment ->
-//               File libDirectory = new File("${buildDir}/libs")
-//               File[] jarFiles = libDirectory.listFiles(new FilenameFilter() {
-//                   @Override
-//                   boolean accept(File dir, String name) {
-//                       if(name.endsWith(".jar")) {
-//                           return true
-//                       }
-//                       return false
-//                   }
-//               })
-//               signing.sign(jarFiles)
-//               deployment.getArtifacts().each {
-//                   println "Artifact ${it} name ${it.getFile().getName()}"
-//               }
-//               
-//               PublishArtifact establishedArtifact = deployment.getArtifacts().iterator().next()
-//
-//               File[] signatureFiles = libDirectory.listFiles(new FilenameFilter() {
-//                   @Override
-//                   boolean accept(File dir, String name) {
-//                       if(name.endsWith(".jar.asc")) {
-//                           return true
-//                       }
-//                       return false
-//                   }
-//               })
-//               signatureFiles.each { signature ->
-//                   println "Signature ${signature.getName()}"
-//                   def artifact = [getDate: establishedArtifact.getDate(), getExtension: 'jar.asc',getFile: signature ,getName: signature.getName(), getType: 'jar.asc'] as PublishArtifact
-//                   deployment.addArtifact(artifact)
-//                   println "Signature ${signature.getName()}"
-//               }
-//               signing.signPom(deployment)
-//            }
-//            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-//                authentication(userName: sonatypeUsername, password: sonatypePassword)
-//            }
-//            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-//                authentication(userName: sonatypeUsername, password: sonatypePassword)
-//            }
-//            pom.project {
-//                name rootProject.name
-//                description rootProject.description
-//                url 'https://github.com/blackducksoftware/hub-detect'
-//                packaging 'jar'
-//                scm {
-//                    connection 'scm:git:git://github.com/blackducksoftware/hub-detect.git'
-//                    developerConnection 'scm:git:git@github.com:blackducksoftware/hub-detect.git'
-//                    url 'https://www.github.com/blackducksoftware/hub-detect'
-//                }
-//                licenses {
-//                    license {
-//                        name 'Apache License 2.0'
-//                        url 'http://www.apache.org/licenses/LICENSE-2.0'
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id 'blackduckoss'
-//                        name 'Black Duck OSS'
-//                        email 'bdsoss@blackducksoftware.com'
-//                        organization 'Black Duck Software, Inc.'
-//                        organizationUrl 'http://www.blackducksoftware.com'
-//                        roles { role 'developer' }
-//                        timezone 'America/New_York'
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
