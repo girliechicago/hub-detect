@@ -144,11 +144,11 @@ uploadArchives {
                        return false
                    }
                })
-               println "Artifact classifier ${establishedArtifact.getClassifier()}"
                signatureFiles.each { signature ->
                    println "Signature ${signature.getName()}"
                    def artifact = [getDate: establishedArtifact.getDate(), getExtension: 'jar.asc',getFile: signature ,getName: signature.getName(), getType: 'jar.asc'] as PublishArtifact
                    deployment.addArtifact(artifact)
+                   println "Signature ${signature.getName()}"
                }
                signing.signPom(deployment)
             }
