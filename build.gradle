@@ -166,7 +166,7 @@ task createPom  {
                 }
             }
         }.writeTo("${buildDir}/poms/pom.xml")
-        File pomFile = file("${buildDir}/poms/pom.xml")
+        File pomFile = file("${buildDir}/poms/${rootProject.name}-${rootProject.version}.pom")
         signing.sign(pomFile)
     }
 }
